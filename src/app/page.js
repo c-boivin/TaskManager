@@ -1,10 +1,53 @@
+"use client";
+
+import { useState } from "react";
+import TaskList from "../components/TaskList";
+
+const initialTasks = [
+  {
+    id: "1",
+    title: "Préparer la présentation",
+    description: "Slides et démo pour la réunion client",
+    priority: "haute",
+    completed: false,
+  },
+  {
+    id: "2",
+    title: "Répondre aux e-mails",
+    description: "Boîte de réception à traiter",
+    priority: "moyenne",
+    completed: true,
+  },
+  {
+    id: "3",
+    title: "Mettre à jour la documentation",
+    description: "README et notes internes",
+    priority: "basse",
+    completed: false,
+  },
+];
+
 export default function Home() {
+  const [tasks, setTasks] = useState(initialTasks);
+
+  function onToggle(id) {
+    setTasks((prev) =>
+      prev.map((task) =>
+        task.id === id ? { ...task, completed: !task.completed } : task,
+      ),
+    );
+  }
+
+  function onDelete(id) {
+    setTasks((prev) => prev.filter((task) => task.id !== id));
+  }
+
   return (
     <div
       id="tasks"
       className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 px-6 font-sans dark:bg-zinc-950"
     >
-      <main className="flex max-w-lg flex-col items-center text-center">
+      <main className="flex w-full max-w-lg flex-col items-center text-center">
         <h1 className="text-4xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50 sm:text-5xl">
           TaskManager
         </h1>
@@ -17,6 +60,9 @@ export default function Home() {
         >
           Commencer
         </button>
+        <div className="mt-10 w-full text-left">
+          <TaskList tasks={tasks} onToggle={onToggle} onDelete={onDelete} />
+        </div>
       </main>
     </div>
   );
