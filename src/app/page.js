@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import AddTaskForm from "../components/AddTaskForm";
 import TaskList from "../components/TaskList";
 
 const initialTasks = [
@@ -42,6 +43,19 @@ export default function Home() {
     setTasks((prev) => prev.filter((task) => task.id !== id));
   }
 
+  function onAdd({ title, description, priority }) {
+    setTasks((prev) => [
+      {
+        id: crypto.randomUUID(),
+        title,
+        description: description ?? "",
+        priority,
+        completed: false,
+      },
+      ...prev,
+    ]);
+  }
+
   return (
     <div
       id="tasks"
@@ -56,11 +70,14 @@ export default function Home() {
         </p>
         <button
           type="button"
-          className="mt-10 inline-flex h-11 cursor-pointer items-center justify-center rounded-full bg-zinc-900 px-8 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+          className="mt-8 inline-flex h-11 cursor-pointer items-center justify-center rounded-full bg-zinc-900 px-8 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
         >
           Commencer
         </button>
-        <div className="mt-10 w-full text-left">
+        <div className="mt-8 w-full text-left">
+          <AddTaskForm onAdd={onAdd} />
+        </div>
+        <div className="mt-8 w-full text-left">
           <TaskList tasks={tasks} onToggle={onToggle} onDelete={onDelete} />
         </div>
       </main>
