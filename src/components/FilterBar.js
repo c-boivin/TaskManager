@@ -1,5 +1,11 @@
 "use client";
 
+/** Tri par priorité : haute → moyenne → basse (pour utilisation côté liste, ex. page.js). */
+export function compareTasksByPriorityHighFirst(a, b) {
+  const rank = { haute: 0, moyenne: 1, basse: 2 };
+  return (rank[a.priority] ?? 99) - (rank[b.priority] ?? 99);
+}
+
 const FILTERS = [
   { value: "all", label: "Toutes" },
   { value: "active", label: "Actives" },

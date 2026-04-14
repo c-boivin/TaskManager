@@ -2,11 +2,11 @@
 
 import { useMemo, useState } from "react";
 import AddTaskForm from "../components/AddTaskForm";
-import FilterBar from "../components/FilterBar";
+import FilterBar, {
+  compareTasksByPriorityHighFirst,
+} from "../components/FilterBar";
 import SearchBar from "../components/SearchBar";
 import TaskList from "../components/TaskList";
-
-const PRIORITY_RANK = { basse: 1, moyenne: 2, haute: 3 };
 
 const initialTasks = [
   {
@@ -56,10 +56,7 @@ export default function Home() {
       })
       .sort((a, b) => {
         if (sortOrder === "priority") {
-          return (
-            (PRIORITY_RANK[a.priority] ?? 0) -
-            (PRIORITY_RANK[b.priority] ?? 0)
-          );
+          return compareTasksByPriorityHighFirst(a, b);
         }
         return (a.createdAt ?? 0) - (b.createdAt ?? 0);
       });
@@ -131,8 +128,8 @@ export default function Home() {
               onChange={(e) => setSortOrder(e.target.value)}
               className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-50"
             >
-              <option value="priority">Priorité (croissant)</option>
-              <option value="date">Date (plus anciennes d'abord)</option>
+              <option value="priority">Priorité (hautes → basses)</option>
+              <option value="date">Date (plus anciennes d’abord)</option>
             </select>
           </div>
           {tasks.length > 0 && visibleTasks.length === 0 ? (

@@ -75,6 +75,7 @@ export default function TaskItem({
           </h3>
           <span
             className={`rounded-full border px-2 py-0.5 text-xs ${badgeClass}`}
+            aria-label={`Priorité : ${priority}`}
           >
             {priority}
           </span>
