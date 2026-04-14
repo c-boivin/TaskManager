@@ -1,5 +1,12 @@
 "use client";
 
+/** Valeurs de filtre partagées avec la page (liste) pour éviter tout décalage de chaînes. */
+export const TASK_STATUS = {
+  ALL: "all",
+  ACTIVE: "active",
+  COMPLETED: "completed",
+};
+
 /** Tri par priorité : haute → moyenne → basse (pour utilisation côté liste, ex. page.js). */
 export function compareTasksByPriorityHighFirst(a, b) {
   const rank = { haute: 0, moyenne: 1, basse: 2 };
@@ -7,12 +14,15 @@ export function compareTasksByPriorityHighFirst(a, b) {
 }
 
 const FILTERS = [
-  { value: "all", label: "Toutes" },
-  { value: "active", label: "Actives" },
-  { value: "completed", label: "Complétées" },
+  { value: TASK_STATUS.ALL, label: "Toutes" },
+  { value: TASK_STATUS.ACTIVE, label: "Actives" },
+  { value: TASK_STATUS.COMPLETED, label: "Complétées" },
 ];
 
-export default function FilterBar({ currentFilter = "all", onFilterChange }) {
+export default function FilterBar({
+  currentFilter = TASK_STATUS.ALL,
+  onFilterChange,
+}) {
   return (
     <div
       className="flex flex-wrap gap-2"

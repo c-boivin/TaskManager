@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import AddTaskForm from "../components/AddTaskForm";
 import FilterBar, {
   compareTasksByPriorityHighFirst,
+  TASK_STATUS,
 } from "../components/FilterBar";
 import SearchBar from "../components/SearchBar";
 import TaskList from "../components/TaskList";
@@ -38,7 +39,7 @@ const initialTasks = [
 export default function Home() {
   const [tasks, setTasks] = useState(initialTasks);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filter, setFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState(TASK_STATUS.ALL);
   const [sortOrder, setSortOrder] = useState("priority");
 
   const visibleTasks = useMemo(() => {
@@ -50,8 +51,9 @@ export default function Home() {
           q === "" || (task.title ?? "").toLowerCase().includes(q),
       )
       .filter((task) => {
-        if (filter === "active") return !task.completed;
-        if (filter === "completed") return task.completed;
+        const done = task.completed === true;
+        if (statusFilter === TASK_STATUS.ACTIVE) return !done;
+        if (statusFilter === TASK_STATUS.COMPLETED) return done;
         return true;
       })
       .sort((a, b) => {
@@ -60,7 +62,7 @@ export default function Home() {
         }
         return (a.createdAt ?? 0) - (b.createdAt ?? 0);
       });
-  }, [tasks, searchQuery, filter, sortOrder]);
+  }, [tasks, searchQuery, statusFilter, sortOrder]);
 
   function onToggle(id) {
     setTasks((prev) =>
@@ -114,7 +116,10 @@ export default function Home() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <FilterBar currentFilter={filter} onFilterChange={setFilter} />
+          <FilterBar
+            currentFilter={statusFilter}
+            onFilterChange={setStatusFilter}
+          />
           <div>
             <label
               htmlFor="task-sort-order"
