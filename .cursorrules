@@ -1,1 +1,46 @@
-Tu es un assistant spécialisé en développement Next.js avec App Router et Tailwind CSS.Projet : Application de gestion de tâches (TaskManager). Règles à suivre :- Utilise des composants fonctionnels React avec des hooks- Écris en JSX (fichiers .js, pas .tsx)- Utilise Tailwind CSS pour tout le style (pas de CSS modules)- Nomme les composants en PascalCase (ex: TaskItem, TaskList)- Place les composants réutilisables dans src/components/- Utilise les balises HTML sémantiques (main, section, nav, article, header)- Ajoute les attributs d'accessibilité quand nécessaire (aria-label, alt, role)- Commente le code en français- Pour les pages Next.js, utilise le App Router (src/app/)- Exporte les composants de page par défaut (export default)
+Tu es un assistant spécialisé en développement Next.js avec App Router et Tailwind CSS.
+
+## Projet
+
+Application de gestion de tâches (TaskManager).
+
+## Composants existants (`src/components/`)
+
+- **AddTaskForm** — formulaire d’ajout de tâche
+- **FilterBar** — filtres par statut (exporte aussi `TASK_STATUS`, `compareTasksByPriorityHighFirst`)
+- **Header** — en-tête et navigation
+- **SearchBar** — recherche textuelle
+- **TaskItem** — carte d’une tâche (complétion, suppression)
+- **TaskList** — liste des tâches
+
+Réutiliser et étendre ces composants plutôt que dupliquer la logique. Les nouveaux composants réutilisables vont dans `src/components/`.
+
+## Conventions de style et React
+
+- Composants **fonctionnels** avec hooks si besoin.
+- **JSX** dans des fichiers **`.js`** (pas de `.tsx`).
+- **Tailwind CSS** pour tout le style visuel (pas de CSS Modules pour le style des composants).
+- **Nommage** : composants en PascalCase (`TaskItem`, `TaskList`, etc.).
+- **`"use client"`** : placer en première ligne du fichier lorsque le composant utilise des hooks React, des gestionnaires d’événements du navigateur, ou l’état local ; l’**omettre** pour les composants purement présentationnels sans hooks (ex. `Header`) importés dans une page ou un parent déjà client si la hiérarchie le permet, ou selon la doc Next.js du projet dans `node_modules/next/dist/docs/`.
+- **Pages** : App Router sous `src/app/`, export par défaut des pages.
+- **Commentaires** en français lorsque le code est commenté.
+
+## Structure HTML
+
+- Balises **sémantiques** : `main`, `section`, `nav`, `article`, `header`, etc., selon le rôle du bloc.
+
+## Accessibilité (a11y)
+
+- **Formulaires** : chaque champ identifiable doit avoir un `<label>` associé via `htmlFor` / `id` ; utiliser `className="sr-only"` pour un libellé accessible lorsque le design n’affiche pas de label visible.
+- **Icônes décoratives** : `aria-hidden` sur les SVG (ou conteneurs) qui n’apportent pas d’information seuls.
+- **Boutons icône seule** : `aria-label` explicite en français (action + contexte si utile).
+- **Groupes d’options** (filtres, segments) : `role="group"` et `aria-label` décrivant le groupe.
+- **Bascules / onglets visuels** : pour des boutons qui activent un état, utiliser `aria-pressed` (ou le rôle natif adapté).
+- **Cases à cocher personnalisées** : `role="checkbox"`, `aria-checked`, et `aria-label` décrivant l’action et la tâche concernée.
+- **Focus clavier** : styles visibles au focus (`focus-visible:ring-*`, `focus:outline-none` uniquement si compensé par un anneau ou équivalent).
+- **Images informatives** : attribut `alt` descriptif ; décoratives : `alt=""` ou traitement équivalent.
+- Compléter avec `aria-*` ou rôles ARIA seulement quand le HTML natif ne suffit pas.
+
+## Référence Next.js
+
+Ce dépôt peut utiliser une version Next.js avec changements par rapport aux habitudes courantes : consulter les guides dans `node_modules/next/dist/docs/` et respecter les dépréciations.

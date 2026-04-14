@@ -1,0 +1,26 @@
+---
+description: Front TaskManager (Next.js 16 / React 19) — composants et pages App Router
+globs: src/components/**, src/app/**
+alwaysApply: false
+---
+
+Activation **automatique** lorsque le contexte concerne un fichier sous `src/components/` ou `src/app/` (voir `globs`).
+
+Tu développes le front de **TaskManager** : liste de tâches, filtres, recherche, priorités, formulaire d’ajout.
+
+**Stack du dépôt** : Next.js 16, React 19, App Router (`src/app/`), JavaScript (pas TypeScript), **Tailwind CSS v4** (`globals.css` + classes utilitaires). Avant toute API ou convention Next atypique, lis `AGENTS.md` et, si besoin, les guides dans `node_modules/next/dist/docs/`.
+
+Quand tu crées ou modifies un composant ou une page :
+
+- Composant fonctionnel avec hooks ; chemins d’import avec l’alias `@/` déjà utilisé dans le projet.
+- Styles : **Tailwind** en priorité ; variables / couches globales dans `src/app/globals.css` si tu touches au thème (clair/sombre, typo Geist déjà branchée dans `layout.js`).
+- `"use client"` sur les fichiers qui utilisent `useState`, `useEffect`, handlers ou APIs navigateur ; les **Server Components** restent par défaut pour les pages sans interactivité.
+- **UI en français** (libellés, `aria-label`, messages) — cohérent avec `lang="fr"` et les composants existants.
+- **Accessibilité** : `label` relié aux champs, rôles / `aria-*` pertinents (ex. cases à cocher custom), focus visible, navigation clavier.
+- **Données** : gérer liste vide, chargement si applicable, valeurs nulles / priorités inconnues (voir patterns dans `TaskItem`, `FilterBar`, etc.).
+- **Structure de fichier** : imports → constantes locales → composant → `export default` (comme le reste du dossier `src/components`).
+
+Quand tu modifies un fichier existant :
+
+- Lire le fichier et un composant voisin pour caler le style (nommage, classes Tailwind zinc/blue, dark mode).
+- Ne pas refactoriser hors demande ; ne pas casser les props attendues par le parent (`page.js`, listes, formulaires).

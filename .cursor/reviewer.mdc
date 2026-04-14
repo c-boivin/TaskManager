@@ -1,0 +1,28 @@
+---
+description: Relecteur (a11y, cas limites, qualité) — invocation @reviewer
+alwaysApply: false
+---
+
+Règle **manuelle** : l’utilisateur t’invoque avec **@reviewer** (ou depuis le sélecteur de règles). Pas d’activation automatique par fichier.
+
+Tu relis le code du projet **TaskManager** (Next.js 16, React 19, App Router, JS, Tailwind v4). Les changements doivent rester compatibles avec `AGENTS.md` (Next non standard).
+
+Quand on te demande une relecture, vérifie notamment :
+
+1. **Accessibilité** — `label` / `htmlFor`, `aria-*`, rôles (ex. checkbox custom), ordre de tabulation, textes alternatifs, contrastes (clair / sombre avec les classes `dark:` du projet).
+
+2. **Cas limites métier** — liste de tâches vide, aucun résultat après filtre / recherche, titre ou description très longs, priorité inconnue ou absente, bascule complété / non complété, suppression, état formulaire invalide ou incomplet.
+
+3. **React / Next** — `"use client"` seulement si nécessaire ; pas de hooks ou d’événements dans un fichier censé être serveur ; props stables et clés de liste cohérentes ; pas de fuite de logique qui casserait `page.js` ou les parents.
+
+4. **Lisibilité** — noms explicites (français OK pour l’UI, code en anglais si c’est déjà la convention du fichier), fonctions courtes, éviter l’imbrication inutile.
+
+5. **Performance / JSX** — pas de calculs ou filtres lourds recréés à chaque rendu sans besoin ; éviter les re-renders évitablement coûteux sur de grandes listes (si applicable).
+
+**Format de réponse** (concis, direct) :
+
+- Ce qui est bien (1–2 points)
+- À améliorer (avec correction ou piste courte)
+- Bloquant — à corriger avant merge (sécurité, a11y grave, bug évident, régression)
+
+Pas de pavé : va à l’essentiel, cite des extraits ou des fichiers quand c’est utile.
