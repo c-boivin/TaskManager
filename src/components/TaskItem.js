@@ -1,9 +1,9 @@
 "use client";
 
 const priorityBadgeClass = {
-  haute: "bg-red-100 text-red-700 border-red-200",
-  moyenne: "bg-orange-100 text-orange-700 border-orange-200",
-  basse: "bg-green-100 text-green-700 border-green-200",
+  haute: "bg-red-100 text-red-900 border-red-300",
+  moyenne: "bg-orange-100 text-orange-900 border-orange-300",
+  basse: "bg-green-100 text-green-900 border-green-300",
 };
 
 export default function TaskItem({
@@ -19,7 +19,9 @@ export default function TaskItem({
 
   return (
     <div
-      className={`flex items-center gap-4 rounded-xl border border-gray-100 bg-white p-4 shadow-sm ${completed ? "opacity-60" : ""}`}
+      className={`flex items-center gap-4 rounded-xl border border-zinc-200 p-4 shadow-sm dark:border-zinc-700 ${
+        completed ? "bg-zinc-100 dark:bg-zinc-900" : "bg-white dark:bg-zinc-950"
+      }`}
     >
       <button
         type="button"
@@ -30,7 +32,7 @@ export default function TaskItem({
             ? `Marquer « ${title} » comme non complétée`
             : `Marquer « ${title} » comme complétée`
         }
-        className={`flex-shrink-0 ${completed ? "text-blue-600" : "text-gray-400 hover:text-blue-500"}`}
+        className={`flex-shrink-0 ${completed ? "text-blue-700 dark:text-blue-400" : "text-zinc-600 hover:text-blue-600 dark:text-zinc-400 dark:hover:text-blue-400"}`}
         onClick={() => onToggle(id)}
       >
         {completed ? (
@@ -69,7 +71,7 @@ export default function TaskItem({
       <div className="min-w-0 flex-grow">
         <div className="mb-1 flex items-center gap-2">
           <h3
-            className={`truncate font-semibold text-gray-900 ${completed ? "text-gray-500 line-through" : ""}`}
+            className={`truncate font-semibold ${completed ? "text-zinc-600 line-through dark:text-zinc-400" : "text-zinc-900 dark:text-zinc-50"}`}
           >
             {title}
           </h3>
@@ -81,12 +83,16 @@ export default function TaskItem({
           </span>
         </div>
         {description ? (
-          <p className="truncate text-sm text-gray-600">{description}</p>
+          <p
+            className={`truncate text-sm ${completed ? "text-zinc-600 dark:text-zinc-400" : "text-zinc-800 dark:text-zinc-200"}`}
+          >
+            {description}
+          </p>
         ) : null}
       </div>
       <button
         type="button"
-        className="flex-shrink-0 rounded-lg p-2 text-gray-400 hover:bg-red-50 hover:text-red-500"
+        className="flex-shrink-0 rounded-lg p-2 text-zinc-600 hover:bg-red-50 hover:text-red-700 dark:text-zinc-400 dark:hover:bg-red-950/40 dark:hover:text-red-400"
         aria-label={`Supprimer la tâche « ${title} »`}
         onClick={() => onDelete(id)}
       >

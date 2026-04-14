@@ -7,7 +7,7 @@ export default function TaskList({ tasks, onToggle, onDelete }) {
 
   if (list.length === 0) {
     return (
-      <p className="py-8 text-center text-gray-500">
+      <p className="py-8 text-center text-zinc-700 dark:text-zinc-300">
         Aucune tâche pour le moment
       </p>
     );
