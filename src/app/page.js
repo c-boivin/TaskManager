@@ -117,7 +117,16 @@ export default function Home() {
         <div className="mt-8 w-full text-left">
           <AddTaskForm onAdd={onAdd} />
         </div>
-        <div className="mt-8 flex w-full flex-col gap-4 text-left">
+        <section
+          className="mt-8 flex w-full flex-col gap-4 text-left"
+          aria-labelledby="tasks-section-heading"
+        >
+          <h2
+            id="tasks-section-heading"
+            className="text-lg font-semibold tracking-tight text-zinc-900 dark:text-zinc-50"
+          >
+            Vos tâches
+          </h2>
           <SearchBar
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -164,7 +173,7 @@ export default function Home() {
               onDelete={onDelete}
             />
           )}
-        </div>
+        </section>
       </main>
     </div>
   );
