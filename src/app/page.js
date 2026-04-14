@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import AddTaskForm from "../components/AddTaskForm";
+import Dashboard from "../components/Dashboard";
 import FilterBar, {
   compareTasksByPriorityHighFirst,
   TASK_STATUS,
@@ -127,6 +128,7 @@ export default function Home() {
           >
             Vos tâches
           </h2>
+          <Dashboard tasks={tasks} />
           <SearchBar
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
