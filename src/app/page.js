@@ -42,6 +42,12 @@ export default function Home() {
   const [statusFilter, setStatusFilter] = useState(TASK_STATUS.ALL);
   const [sortOrder, setSortOrder] = useState("priority");
 
+  const { activeCount, totalCount } = useMemo(() => {
+    const total = tasks.length;
+    const active = tasks.filter((task) => task.completed !== true).length;
+    return { activeCount: active, totalCount: total };
+  }, [tasks]);
+
   const visibleTasks = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
 
@@ -116,10 +122,20 @@ export default function Home() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <FilterBar
-            currentFilter={statusFilter}
-            onFilterChange={setStatusFilter}
-          />
+          <div className="flex flex-col gap-1">
+            <FilterBar
+              currentFilter={statusFilter}
+              onFilterChange={setStatusFilter}
+            />
+            <p
+              className="text-sm text-zinc-600 dark:text-zinc-400"
+              aria-live="polite"
+            >
+              {activeCount === 1
+                ? `1 tâche active sur ${totalCount}`
+                : `${activeCount} tâches actives sur ${totalCount}`}
+            </p>
+          </div>
           <div>
             <label
               htmlFor="task-sort-order"
