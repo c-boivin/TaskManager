@@ -13,9 +13,15 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "TaskManager - Gestion de tâches",
+  title: {
+    default: "TaskManager",
+    template: "%s | TaskManager",
+  },
   description:
     "Application de gestion de tâches pour organiser votre quotidien efficacement.",
+  icons: {
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+  },
 };
 
 export const viewport = {
