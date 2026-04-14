@@ -1,8 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import AddTaskForm from "../components/AddTaskForm";
+import FilterBar from "../components/FilterBar";
+import SearchBar from "../components/SearchBar";
 import TaskList from "../components/TaskList";
+
+const PRIORITY_RANK = { basse: 1, moyenne: 2, haute: 3 };
 
 const initialTasks = [
   {
@@ -11,6 +15,7 @@ const initialTasks = [
     description: "Slides et démo pour la réunion client",
     priority: "haute",
     completed: false,
+    createdAt: 1_704_000_000_000,
   },
   {
     id: "2",
@@ -18,6 +23,7 @@ const initialTasks = [
     description: "Boîte de réception à traiter",
     priority: "moyenne",
     completed: true,
+    createdAt: 1_706_000_000_000,
   },
   {
     id: "3",
@@ -25,11 +31,39 @@ const initialTasks = [
     description: "README et notes internes",
     priority: "basse",
     completed: false,
+    createdAt: 1_708_000_000_000,
   },
 ];
 
 export default function Home() {
   const [tasks, setTasks] = useState(initialTasks);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filter, setFilter] = useState("all");
+  const [sortOrder, setSortOrder] = useState("priority");
+
+  const visibleTasks = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+
+    return tasks
+      .filter(
+        (task) =>
+          q === "" || (task.title ?? "").toLowerCase().includes(q),
+      )
+      .filter((task) => {
+        if (filter === "active") return !task.completed;
+        if (filter === "completed") return task.completed;
+        return true;
+      })
+      .sort((a, b) => {
+        if (sortOrder === "priority") {
+          return (
+            (PRIORITY_RANK[a.priority] ?? 0) -
+            (PRIORITY_RANK[b.priority] ?? 0)
+          );
+        }
+        return (a.createdAt ?? 0) - (b.createdAt ?? 0);
+      });
+  }, [tasks, searchQuery, filter, sortOrder]);
 
   function onToggle(id) {
     setTasks((prev) =>
@@ -51,6 +85,7 @@ export default function Home() {
         description: description ?? "",
         priority,
         completed: false,
+        createdAt: Date.now(),
       },
       ...prev,
     ]);
@@ -77,8 +112,40 @@ export default function Home() {
         <div className="mt-8 w-full text-left">
           <AddTaskForm onAdd={onAdd} />
         </div>
-        <div className="mt-8 w-full text-left">
-          <TaskList tasks={tasks} onToggle={onToggle} onDelete={onDelete} />
+        <div className="mt-8 flex w-full flex-col gap-4 text-left">
+          <SearchBar
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <FilterBar currentFilter={filter} onFilterChange={setFilter} />
+          <div>
+            <label
+              htmlFor="task-sort-order"
+              className="mb-1 block text-xs font-medium text-zinc-600 dark:text-zinc-400"
+            >
+              Trier par
+            </label>
+            <select
+              id="task-sort-order"
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value)}
+              className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-50"
+            >
+              <option value="priority">Priorité (croissant)</option>
+              <option value="date">Date (plus anciennes d'abord)</option>
+            </select>
+          </div>
+          {tasks.length > 0 && visibleTasks.length === 0 ? (
+            <p className="py-8 text-center text-zinc-500 dark:text-zinc-400">
+              Aucune tâche ne correspond à ces critères.
+            </p>
+          ) : (
+            <TaskList
+              tasks={visibleTasks}
+              onToggle={onToggle}
+              onDelete={onDelete}
+            />
+          )}
         </div>
       </main>
     </div>
