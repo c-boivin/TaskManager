@@ -27,8 +27,8 @@ export default function TaskItem({
         aria-checked={completed}
         aria-label={
           completed
-            ? "Marquer comme non complétée"
-            : "Marquer comme complétée"
+            ? `Marquer « ${title} » comme non complétée`
+            : `Marquer « ${title} » comme complétée`
         }
         className={`flex-shrink-0 ${completed ? "text-blue-600" : "text-gray-400 hover:text-blue-500"}`}
         onClick={() => onToggle(id)}
@@ -87,7 +87,7 @@ export default function TaskItem({
       <button
         type="button"
         className="flex-shrink-0 rounded-lg p-2 text-gray-400 hover:bg-red-50 hover:text-red-500"
-        aria-label="Supprimer la tâche"
+        aria-label={`Supprimer la tâche « ${title} »`}
         onClick={() => onDelete(id)}
       >
         <svg

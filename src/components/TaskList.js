@@ -14,7 +14,7 @@ export default function TaskList({ tasks, onToggle, onDelete }) {
   }
 
   return (
-    <ul className="flex flex-col gap-4">
+    <ul className="flex flex-col gap-4" aria-label="Liste des tâches">
       {list.map((task) => (
         <li key={task.id}>
           <TaskItem
