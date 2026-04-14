@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# TaskManager
 
-## Getting Started
+Application web de gestion de tâches (exercice / démo), construite avec **Next.js** et **React**. Interface en français, thème clair / sombre (Tailwind CSS).
 
-First, run the development server:
+## Fonctionnalités
+
+- Ajouter des tâches (titre, description optionnelle, priorité)
+- Marquer une tâche comme complétée ou la supprimer
+- Rechercher par titre, filtrer (toutes / actives / complétées), trier par priorité ou par date
+- Tableau de bord : statistiques et barre de progression
+
+Les données restent **en mémoire côté client** (rechargement = retour aux données de départ), sauf évolution ultérieure. Pour une analyse détaillée (composants, production), voir **[BILAN.md](./BILAN.md)**.
+
+## Prérequis
+
+- [Node.js](https://nodejs.org/) (version compatible avec Next.js 16)
+
+## Démarrage
+
+Installation des dépendances :
+
+```bash
+npm install
+```
+
+Serveur de développement :
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Ouvrir [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Commande | Description |
+|----------|-------------|
+| `npm run dev` | Mode développement |
+| `npm run build` | Build de production (export statique, voir `next.config.mjs`) |
+| `npm run start` | Sert le build (après `npm run build`) |
+| `npm run lint` | ESLint |
 
-## Learn More
+## Structure utile
 
-To learn more about Next.js, take a look at the following resources:
+- `src/app/page.js` — page d’accueil et logique principale (liste, filtres, tri)
+- `src/app/layout.js` — layout racine, métadonnées, en-tête
+- `src/components/` — composants UI (formulaire, liste, filtres, tableau de bord, etc.)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Stack
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Next.js 16, React 19
+- Tailwind CSS 4
+- Export statique (`output: "export"` dans `next.config.mjs`) : déploiement type hébergement de fichiers statiques
 
-## Deploy on Vercel
+## Déploiement
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Tout site compatible avec un **export statique** (Vercel, Netlify, GitHub Pages avec config adaptée, etc.). Consulter la [documentation de déploiement Next.js](https://nextjs.org/docs/app/building-your-application/deploying).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Ressources Next.js
+
+- [Documentation Next.js](https://nextjs.org/docs)
+- [Tutoriel interactif](https://nextjs.org/learn)
