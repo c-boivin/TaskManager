@@ -82,21 +82,19 @@ export default function SharedPage() {
   const activeList = lists.find((l) => l.id === activeListId) ?? null;
 
   useEffect(() => {
-    if (!activeListId) {
-      setTasks([]);
-      setMembers([]);
-      return;
-    }
+    if (!activeListId) return;
 
     const unsubscribe = subscribeToSharedTasks(activeListId, setTasks);
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      setTasks([]);
+    };
   }, [activeListId]);
 
+  const memberKey = activeList?.members?.join(",") ?? "";
+
   useEffect(() => {
-    if (!activeList) {
-      setMembers([]);
-      return;
-    }
+    if (!activeList) return;
 
     let cancelled = false;
     fetchMemberProfiles(activeList.members).then((profiles) => {
@@ -104,8 +102,9 @@ export default function SharedPage() {
     });
     return () => {
       cancelled = true;
+      setMembers([]);
     };
-  }, [activeList?.members?.join(",")]);
+  }, [activeList, memberKey]);
 
   const handleCreateList = useCallback(
     async (name) => {
