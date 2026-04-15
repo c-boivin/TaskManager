@@ -8,6 +8,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  limit,
   onSnapshot,
   orderBy,
   query,
@@ -140,12 +141,13 @@ export async function addMemberToList(listId, email, requestingUserId) {
 
     const usersQuery = query(
       collection(db, "users"),
-      where("email", "==", email.trim())
+      where("email", "==", email.trim()),
+      limit(1)
     );
     const usersSnap = await getDocs(usersQuery);
 
     if (usersSnap.empty) {
-      throw new Error("Aucun utilisateur trouvé avec cet email.");
+      throw new Error("Impossible d'ajouter ce membre. Vérifiez l'adresse e-mail.");
     }
 
     const targetUserId = usersSnap.docs[0].id;
@@ -156,7 +158,7 @@ export async function addMemberToList(listId, email, requestingUserId) {
     if (
       error.message === "Liste partagée introuvable." ||
       error.message === "Seul le propriétaire peut ajouter un membre." ||
-      error.message === "Aucun utilisateur trouvé avec cet email."
+      error.message === "Impossible d'ajouter ce membre. Vérifiez l'adresse e-mail."
     ) {
       throw error;
     }
@@ -301,6 +303,22 @@ export async function deleteSharedTask(listId, taskId) {
   } catch (error) {
     throw wrapFirestoreError(`Échec de la suppression de la tâche ${taskId}`, error);
   }
+}
+
+export async function fetchMemberProfiles(memberIds) {
+  if (!memberIds?.length) return [];
+
+  const profiles = await Promise.all(
+    memberIds.map(async (id) => {
+      try {
+        const snap = await getDoc(doc(db, "users", id));
+        return { uid: id, email: snap.exists() ? (snap.data().email ?? id) : id };
+      } catch {
+        return { uid: id, email: id };
+      }
+    })
+  );
+  return profiles;
 }
 
 export function subscribeToSharedTasks(listId, callback, onError) {

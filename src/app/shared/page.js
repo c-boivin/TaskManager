@@ -1,8 +1,6 @@
 "use client";
 
 import { useCallback, useContext, useEffect, useState } from "react";
-import { collection, getDocs, query, where } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import { AuthContext } from "@/contexts/AuthContext";
 import AuthGuard from "@/components/AuthGuard";
 import CreateListForm from "@/components/CreateListForm";
@@ -15,38 +13,12 @@ import {
   createSharedList,
   deleteSharedList,
   deleteSharedTask,
+  fetchMemberProfiles,
   removeMemberFromList,
   subscribeToSharedLists,
   subscribeToSharedTasks,
   updateSharedTask,
 } from "@/services/sharedListService";
-
-async function fetchMemberProfiles(memberIds) {
-  if (!memberIds?.length) return [];
-
-  const usersRef = collection(db, "users");
-  const batches = [];
-  for (let i = 0; i < memberIds.length; i += 10) {
-    batches.push(memberIds.slice(i, i + 10));
-  }
-
-  const profiles = [];
-  for (const batch of batches) {
-    const q = query(usersRef, where("__name__", "in", batch));
-    const snap = await getDocs(q);
-    snap.docs.forEach((d) => {
-      profiles.push({ uid: d.id, email: d.data().email ?? d.id });
-    });
-  }
-
-  memberIds.forEach((id) => {
-    if (!profiles.some((p) => p.uid === id)) {
-      profiles.push({ uid: id, email: id });
-    }
-  });
-
-  return profiles;
-}
 
 export default function SharedPage() {
   const { user, loading: authLoading } = useContext(AuthContext);
