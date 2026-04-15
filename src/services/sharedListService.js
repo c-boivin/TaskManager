@@ -211,6 +211,7 @@ export async function addSharedTask(listId, userId, task) {
   try {
     const docRef = await addDoc(sharedTasksRef(listId), {
       title,
+      description: task.description?.trim() ?? "",
       completed: false,
       priority: task.priority ?? "medium",
       createdAt: serverTimestamp(),
