@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import AuthGuard from "../components/AuthGuard";
 import AddTaskForm from "../components/AddTaskForm";
 import Dashboard from "../components/Dashboard";
@@ -10,39 +10,68 @@ import FilterBar, {
 } from "../components/FilterBar";
 import SearchBar from "../components/SearchBar";
 import TaskList from "../components/TaskList";
+import { AuthContext } from "@/contexts/AuthContext";
+import {
+  addTask,
+  deleteTask,
+  subscribeToTasks,
+  updateTask,
+} from "@/services/taskService";
 
-const initialTasks = [
-  {
-    id: "1",
-    title: "Préparer la présentation",
-    description: "Slides et démo pour la réunion client",
-    priority: "haute",
-    completed: false,
-    createdAt: 1_704_000_000_000,
-  },
-  {
-    id: "2",
-    title: "Répondre aux e-mails",
-    description: "Boîte de réception à traiter",
-    priority: "moyenne",
-    completed: true,
-    createdAt: 1_706_000_000_000,
-  },
-  {
-    id: "3",
-    title: "Mettre à jour la documentation",
-    description: "README et notes internes",
-    priority: "basse",
-    completed: false,
-    createdAt: 1_708_000_000_000,
-  },
-];
+function createdAtMillis(createdAt) {
+  if (createdAt == null) return 0;
+  if (typeof createdAt === "number") return createdAt;
+  if (typeof createdAt?.toMillis === "function") return createdAt.toMillis();
+  if (typeof createdAt?.seconds === "number") {
+    return createdAt.seconds * 1000 + Math.floor((createdAt.nanoseconds ?? 0) / 1e6);
+  }
+  return 0;
+}
 
 export default function Home() {
-  const [tasks, setTasks] = useState(initialTasks);
+  const { user } = useContext(AuthContext);
+  const userId = user?.uid;
+
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState(TASK_STATUS.ALL);
   const [sortOrder, setSortOrder] = useState("priority");
+
+  useEffect(() => {
+    if (!userId) {
+      setTasks([]);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    let unsubscribe;
+    try {
+      unsubscribe = subscribeToTasks(
+        userId,
+        (nextTasks) => {
+          setTasks(nextTasks);
+          setLoading(false);
+          setError(null);
+        },
+        (err) => {
+          setError(err?.message ?? String(err));
+          setLoading(false);
+        },
+      );
+    } catch (e) {
+      setError(e?.message ?? String(e));
+      setLoading(false);
+    }
+
+    return () => {
+      unsubscribe?.();
+    };
+  }, [userId]);
 
   const { activeCount, totalCount } = useMemo(() => {
     const total = tasks.length;
@@ -54,10 +83,14 @@ export default function Home() {
     const q = searchQuery.trim().toLowerCase();
 
     return tasks
-      .filter(
-        (task) =>
-          q === "" || (task.title ?? "").toLowerCase().includes(q),
-      )
+      .filter((task) => {
+        if (q === "") return true;
+        const inTitle = (task.title ?? "").toLowerCase().includes(q);
+        const inDescription = (task.description ?? "")
+          .toLowerCase()
+          .includes(q);
+        return inTitle || inDescription;
+      })
       .filter((task) => {
         const done = task.completed === true;
         if (statusFilter === TASK_STATUS.ACTIVE) return !done;
@@ -68,34 +101,37 @@ export default function Home() {
         if (sortOrder === "priority") {
           return compareTasksByPriorityHighFirst(a, b);
         }
-        return (a.createdAt ?? 0) - (b.createdAt ?? 0);
+        return createdAtMillis(a.createdAt) - createdAtMillis(b.createdAt);
       });
   }, [tasks, searchQuery, statusFilter, sortOrder]);
 
-  function onToggle(id) {
-    setTasks((prev) =>
-      prev.map((task) =>
-        task.id === id ? { ...task, completed: !task.completed } : task,
-      ),
-    );
+  async function onToggle(id) {
+    if (!userId) return;
+    const task = tasks.find((t) => t.id === id);
+    if (!task) return;
+    try {
+      setError(null);
+      await updateTask(userId, id, { completed: !task.completed });
+    } catch (e) {
+      setError(e?.message ?? String(e));
+    }
   }
 
-  function onDelete(id) {
-    setTasks((prev) => prev.filter((task) => task.id !== id));
+  async function onDelete(id) {
+    if (!userId) return;
+    try {
+      setError(null);
+      await deleteTask(userId, id);
+    } catch (e) {
+      setError(e?.message ?? String(e));
+    }
   }
 
-  function onAdd({ title, description, priority }) {
-    setTasks((prev) => [
-      {
-        id: crypto.randomUUID(),
-        title,
-        description: description ?? "",
-        priority,
-        completed: false,
-        createdAt: Date.now(),
-      },
-      ...prev,
-    ]);
+  async function onAddTask({ title, priority, description }) {
+    if (!userId) {
+      throw new Error("Session expirée. Veuillez vous reconnecter.");
+    }
+    await addTask(userId, { title, priority, description });
   }
 
   return (
@@ -118,7 +154,7 @@ export default function Home() {
             Commencer
           </button>
           <div className="mt-8 w-full text-left">
-            <AddTaskForm onAdd={onAdd} />
+            <AddTaskForm onAddTask={onAddTask} />
           </div>
           <section
             className="mt-8 flex w-full flex-col gap-4 text-left"
@@ -130,52 +166,72 @@ export default function Home() {
             >
               Vos tâches
             </h2>
-            <Dashboard tasks={tasks} />
-            <SearchBar
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <div className="flex flex-col gap-1">
-              <FilterBar
-                currentFilter={statusFilter}
-                onFilterChange={setStatusFilter}
-              />
+            {error ? (
               <p
-                className="text-sm text-zinc-700 dark:text-zinc-300"
+                className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200"
+                role="alert"
+              >
+                {error}
+              </p>
+            ) : null}
+            {loading ? (
+              <p
+                className="py-8 text-center text-zinc-700 dark:text-zinc-300"
+                role="status"
                 aria-live="polite"
               >
-                {activeCount === 1
-                  ? `1 tâche active sur ${totalCount}`
-                  : `${activeCount} tâches actives sur ${totalCount}`}
-              </p>
-            </div>
-            <div>
-              <label
-                htmlFor="task-sort-order"
-                className="mb-1 block text-xs font-medium text-zinc-700 dark:text-zinc-300"
-              >
-                Trier par
-              </label>
-              <select
-                id="task-sort-order"
-                value={sortOrder}
-                onChange={(e) => setSortOrder(e.target.value)}
-                className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-50"
-              >
-                <option value="priority">Priorité (hautes → basses)</option>
-                <option value="date">Date (plus anciennes d’abord)</option>
-              </select>
-            </div>
-            {tasks.length > 0 && visibleTasks.length === 0 ? (
-              <p className="py-8 text-center text-zinc-700 dark:text-zinc-300">
-                Aucune tâche ne correspond à ces critères.
+                Chargement...
               </p>
             ) : (
-              <TaskList
-                tasks={visibleTasks}
-                onToggle={onToggle}
-                onDelete={onDelete}
-              />
+              <>
+                <Dashboard tasks={tasks} />
+                <SearchBar
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <div className="flex flex-col gap-1">
+                  <FilterBar
+                    currentFilter={statusFilter}
+                    onFilterChange={setStatusFilter}
+                  />
+                  <p
+                    className="text-sm text-zinc-700 dark:text-zinc-300"
+                    aria-live="polite"
+                  >
+                    {activeCount === 1
+                      ? `1 tâche active sur ${totalCount}`
+                      : `${activeCount} tâches actives sur ${totalCount}`}
+                  </p>
+                </div>
+                <div>
+                  <label
+                    htmlFor="task-sort-order"
+                    className="mb-1 block text-xs font-medium text-zinc-700 dark:text-zinc-300"
+                  >
+                    Trier par
+                  </label>
+                  <select
+                    id="task-sort-order"
+                    value={sortOrder}
+                    onChange={(e) => setSortOrder(e.target.value)}
+                    className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-50"
+                  >
+                    <option value="priority">Priorité (hautes → basses)</option>
+                    <option value="date">Date (plus anciennes d’abord)</option>
+                  </select>
+                </div>
+                {tasks.length > 0 && visibleTasks.length === 0 ? (
+                  <p className="py-8 text-center text-zinc-700 dark:text-zinc-300">
+                    Aucune tâche ne correspond à ces critères.
+                  </p>
+                ) : (
+                  <TaskList
+                    tasks={visibleTasks}
+                    onToggle={onToggle}
+                    onDelete={onDelete}
+                  />
+                )}
+              </>
             )}
           </section>
         </main>
