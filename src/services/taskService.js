@@ -142,10 +142,15 @@ export async function addTask(userId, task) {
   }
 }
 
+const ALLOWED_UPDATE_FIELDS = new Set(["title", "description", "completed", "priority"]);
+
 export async function updateTask(userId, taskId, updates) {
   requireUserId(userId);
   requireTaskId(taskId);
-  const payload = omitUndefined(updates);
+  const sanitized = omitUndefined(updates);
+  const payload = Object.fromEntries(
+    Object.entries(sanitized).filter(([k]) => ALLOWED_UPDATE_FIELDS.has(k))
+  );
   if (Object.keys(payload).length === 0) {
     throw new Error(
       "Aucun champ à mettre à jour : tous les champs sont undefined ou l'objet est vide."

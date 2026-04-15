@@ -122,11 +122,22 @@ export function subscribeToSharedLists(userId, callback, onError) {
 // Members
 // ---------------------------------------------------------------------------
 
-export async function addMemberToList(listId, email) {
+export async function addMemberToList(listId, email, requestingUserId) {
   if (!listId) throw new Error("listId est requis.");
   if (!email?.trim()) throw new Error("L'email est requis.");
+  if (!requestingUserId) throw new Error("requestingUserId est requis.");
 
   try {
+    const listRef = doc(db, "sharedLists", listId);
+    const listSnap = await getDoc(listRef);
+
+    if (!listSnap.exists()) {
+      throw new Error("Liste partagée introuvable.");
+    }
+    if (listSnap.data().ownerId !== requestingUserId) {
+      throw new Error("Seul le propriétaire peut ajouter un membre.");
+    }
+
     const usersQuery = query(
       collection(db, "users"),
       where("email", "==", email.trim())
@@ -134,16 +145,21 @@ export async function addMemberToList(listId, email) {
     const usersSnap = await getDocs(usersQuery);
 
     if (usersSnap.empty) {
-      throw new Error(`Aucun utilisateur trouvé avec l'email : ${email}`);
+      throw new Error("Aucun utilisateur trouvé avec cet email.");
     }
 
     const targetUserId = usersSnap.docs[0].id;
-    const listRef = doc(db, "sharedLists", listId);
     await updateDoc(listRef, { members: arrayUnion(targetUserId) });
 
     return targetUserId;
   } catch (error) {
-    if (error.message.startsWith("Aucun utilisateur")) throw error;
+    if (
+      error.message === "Liste partagée introuvable." ||
+      error.message === "Seul le propriétaire peut ajouter un membre." ||
+      error.message === "Aucun utilisateur trouvé avec cet email."
+    ) {
+      throw error;
+    }
     throw wrapFirestoreError("Échec de l'ajout du membre", error);
   }
 }
@@ -163,12 +179,16 @@ export async function removeMemberFromList(listId, userId, requestingUserId) {
     if (listSnap.data().ownerId !== requestingUserId) {
       throw new Error("Seul le propriétaire peut retirer un membre.");
     }
+    if (userId === listSnap.data().ownerId) {
+      throw new Error("Le propriétaire ne peut pas se retirer de sa propre liste.");
+    }
 
     await updateDoc(listRef, { members: arrayRemove(userId) });
   } catch (error) {
     if (
       error.message === "Liste partagée introuvable." ||
-      error.message === "Seul le propriétaire peut retirer un membre."
+      error.message === "Seul le propriétaire peut retirer un membre." ||
+      error.message === "Le propriétaire ne peut pas se retirer de sa propre liste."
     ) {
       throw error;
     }
@@ -247,6 +267,8 @@ export async function addSharedTask(listId, userId, task) {
   }
 }
 
+const ALLOWED_SHARED_TASK_FIELDS = new Set(["title", "description", "completed", "priority"]);
+
 export async function updateSharedTask(listId, taskId, updates) {
   if (!listId) throw new Error("listId est requis.");
   if (!taskId) throw new Error("taskId est requis.");
@@ -255,7 +277,8 @@ export async function updateSharedTask(listId, taskId, updates) {
   }
 
   const payload = Object.fromEntries(
-    Object.entries(updates).filter(([, v]) => v !== undefined)
+    Object.entries(updates)
+      .filter(([k, v]) => v !== undefined && ALLOWED_SHARED_TASK_FIELDS.has(k))
   );
   if (Object.keys(payload).length === 0) {
     throw new Error("Aucun champ à mettre à jour.");
