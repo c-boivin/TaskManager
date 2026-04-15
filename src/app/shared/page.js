@@ -149,11 +149,11 @@ export default function SharedPage() {
 
   const handleAddMember = useCallback(
     async (email) => {
-      if (!activeListId) return;
-      await addMemberToList(activeListId, email);
+      if (!activeListId || !userId) return;
+      await addMemberToList(activeListId, email, userId);
       showSuccess("Membre ajouté avec succès.");
     },
-    [activeListId, showSuccess],
+    [activeListId, userId, showSuccess],
   );
 
   const handleRemoveMember = useCallback(
