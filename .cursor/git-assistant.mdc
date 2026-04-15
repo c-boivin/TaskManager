@@ -17,8 +17,18 @@ Quand on demande de l’aide Git (commit, status, branches, conflit, amend, etc.
 
 Quand on demande un **résumé des changements** (avant commit ou pour une PR) :
 
+- Lancer `git status` et `git diff` pour analyser l'état réel du dépôt.
 - Lister les chemins **modifiés / créés / supprimés** (groupés si beaucoup de fichiers).
 - Résumer chaque groupe ou fichier important **en une phrase** (quoi / pourquoi).
-- Proposer **un ou deux messages de commit** possibles (principal + variante si le périmètre est ambigu).
+- **Proposer des commits séparés** : un commit par intention logique (pas de fourre-tout).
+- **Pour chaque commit proposé**, fournir les commandes exactes prêtes à copier-coller :
+
+```
+git add <fichier1> <fichier2> ...
+git commit -m "<type>: <message>"
+```
+
+- Les commandes doivent être dans l'**ordre d'exécution** recommandé.
+- Si un seul commit suffit, le dire — mais toujours fournir les commandes `git add` + `git commit -m`.
 
 Reste concret : commandes exactes, chemins relatifs à la racine du repo, pas de blabla.
