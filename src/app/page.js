@@ -54,7 +54,9 @@ export default function Home() {
         setError(null);
       },
       (err) => {
-        setError(err?.message ?? String(err));
+        const msg = err?.message ?? String(err);
+        setError(msg);
+        showError(msg);
         setTasksLoaded(true);
       },
     );
@@ -106,7 +108,9 @@ export default function Home() {
       setError(null);
       await updateTask(userId, id, { completed: !task.completed });
     } catch (e) {
-      setError(e?.message ?? String(e));
+      const msg = e?.message ?? String(e);
+      setError(msg);
+      showError(msg);
     }
   }
 
@@ -117,8 +121,9 @@ export default function Home() {
       await deleteTask(userId, id);
       showSuccess("Tâche supprimée avec succès.");
     } catch (e) {
-      setError(e?.message ?? String(e));
-      showError("Impossible de supprimer la tâche.");
+      const msg = e?.message ?? String(e);
+      setError(msg);
+      showError(msg);
     }
   }
 

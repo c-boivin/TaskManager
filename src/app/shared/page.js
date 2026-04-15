@@ -66,11 +66,20 @@ export default function SharedPage() {
   useEffect(() => {
     if (!userId) return;
 
-    const unsubscribe = subscribeToSharedLists(userId, (nextLists) => {
-      setLists(nextLists);
-      setListsLoaded(true);
-      setError(null);
-    });
+    const unsubscribe = subscribeToSharedLists(
+      userId,
+      (nextLists) => {
+        setLists(nextLists);
+        setListsLoaded(true);
+        setError(null);
+      },
+      (err) => {
+        const msg = err?.message ?? String(err);
+        setError(msg);
+        showError(msg);
+        setListsLoaded(true);
+      },
+    );
 
     return () => {
       unsubscribe();
@@ -84,7 +93,13 @@ export default function SharedPage() {
   useEffect(() => {
     if (!activeListId) return;
 
-    const unsubscribe = subscribeToSharedTasks(activeListId, setTasks);
+    const unsubscribe = subscribeToSharedTasks(
+      activeListId,
+      setTasks,
+      (err) => {
+        showError(err?.message ?? String(err));
+      },
+    );
     return () => {
       unsubscribe();
       setTasks([]);
@@ -124,8 +139,9 @@ export default function SharedPage() {
         if (activeListId === listId) setActiveListId(null);
         showSuccess("Liste supprimée avec succès.");
       } catch (e) {
-        setError(e?.message ?? String(e));
-        showError("Impossible de supprimer la liste.");
+        const msg = e?.message ?? String(e);
+        setError(msg);
+        showError(msg);
       }
     },
     [userId, activeListId, showSuccess, showError],
@@ -147,8 +163,7 @@ export default function SharedPage() {
         await removeMemberFromList(activeListId, memberId, userId);
         showSuccess("Membre retiré avec succès.");
       } catch (e) {
-        showError("Impossible de retirer ce membre.");
-        throw e;
+        showError(e?.message ?? String(e));
       }
     },
     [activeListId, userId, showSuccess, showError],
@@ -166,9 +181,13 @@ export default function SharedPage() {
   const handleUpdateTask = useCallback(
     async (taskId, updates) => {
       if (!activeListId) return;
-      await updateSharedTask(activeListId, taskId, updates);
+      try {
+        await updateSharedTask(activeListId, taskId, updates);
+      } catch (e) {
+        showError(e?.message ?? String(e));
+      }
     },
-    [activeListId],
+    [activeListId, showError],
   );
 
   const handleDeleteTask = useCallback(
@@ -178,8 +197,7 @@ export default function SharedPage() {
         await deleteSharedTask(activeListId, taskId);
         showSuccess("Tâche supprimée avec succès.");
       } catch (e) {
-        showError("Impossible de supprimer la tâche.");
-        throw e;
+        showError(e?.message ?? String(e));
       }
     },
     [activeListId, showSuccess, showError],
