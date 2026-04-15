@@ -43,14 +43,10 @@ export default function CreateListForm({ onCreateList }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-xl border border-border bg-card p-4 sm:p-5"
+      className="p-4 sm:p-5"
       noValidate
       aria-describedby={submitError ? submitErrorId : undefined}
     >
-      <h2 className="mb-4 flex items-center gap-2 text-base font-semibold text-foreground">
-        <span className="material-symbols-outlined text-primary-container" style={{ fontSize: 20 }}>playlist_add</span>
-        Créer une nouvelle liste
-      </h2>
 
       {submitError && (
         <div

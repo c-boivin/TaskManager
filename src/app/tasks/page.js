@@ -155,9 +155,18 @@ export default function TasksPage() {
           </p>
         </div>
 
-        <AddTaskForm onAddTask={onAddTask} />
+        <details className="group rounded-xl border border-white/[0.08] bg-[#1f1f25]">
+          <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-3 text-sm font-semibold text-[#e4e1e9] sm:px-5 [&::-webkit-details-marker]:hidden">
+            <span className="material-symbols-outlined text-primary-container transition-transform duration-200 group-open:rotate-90" style={{ fontSize: 20 }}>chevron_right</span>
+            <span className="material-symbols-outlined text-primary-container" style={{ fontSize: 18 }}>add_circle</span>
+            Ajouter une tâche
+          </summary>
+          <div className="border-t border-white/[0.08]">
+            <AddTaskForm onAddTask={onAddTask} />
+          </div>
+        </details>
 
-        <section className="mt-8" aria-labelledby="tasks-section-heading">
+        <section className="mt-6" aria-labelledby="tasks-section-heading">
           <h2 id="tasks-section-heading" className="sr-only">
             Liste des tâches
           </h2>
@@ -191,7 +200,18 @@ export default function TasksPage() {
             </div>
           ) : (
             <>
-              <Dashboard tasks={tasks} />
+              {tasks.length > 0 && (
+                <details className="group mb-4 rounded-xl border border-white/[0.08] bg-[#1f1f25]">
+                  <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-3 text-sm font-semibold text-[#e4e1e9] sm:px-5 [&::-webkit-details-marker]:hidden">
+                    <span className="material-symbols-outlined text-primary-container transition-transform duration-200 group-open:rotate-90" style={{ fontSize: 20 }}>chevron_right</span>
+                    <span className="material-symbols-outlined text-primary-container" style={{ fontSize: 18 }}>monitoring</span>
+                    Progression
+                  </summary>
+                  <div className="border-t border-white/[0.08] px-4 py-4 sm:px-5">
+                    <Dashboard tasks={tasks} />
+                  </div>
+                </details>
+              )}
 
               <div className="mb-4 flex flex-col gap-3">
                 <SearchBar

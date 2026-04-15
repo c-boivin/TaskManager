@@ -232,7 +232,16 @@ export default function SharedPage() {
                 </p>
               </div>
 
-              <CreateListForm onCreateList={handleCreateList} />
+              <details className="group rounded-xl border border-border bg-card">
+                <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-3 text-sm font-semibold text-foreground sm:px-5 [&::-webkit-details-marker]:hidden">
+                  <span className="material-symbols-outlined text-primary-container transition-transform duration-200 group-open:rotate-90" style={{ fontSize: 20 }}>chevron_right</span>
+                  <span className="material-symbols-outlined text-primary-container" style={{ fontSize: 18 }}>playlist_add</span>
+                  Créer une nouvelle liste
+                </summary>
+                <div className="border-t border-border">
+                  <CreateListForm onCreateList={handleCreateList} />
+                </div>
+              </details>
 
               {error && (
                 <div className="mt-6 rounded-xl border border-error/20 bg-error/5 px-4 py-3 text-sm text-error" role="alert">

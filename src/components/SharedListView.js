@@ -10,9 +10,9 @@ import FilterBar, {
 import TaskItem from "./TaskItem";
 
 const PRIORITIES = [
-  { value: "basse", label: "Basse", color: "bg-[#4ae176]" },
-  { value: "moyenne", label: "Moyenne", color: "bg-[#c0c7d6]" },
-  { value: "haute", label: "Haute", color: "bg-[#ffb4ab]" },
+  { value: "basse", label: "Basse", color: "bg-[#4ae176]", activeBg: "bg-[#4ae176]/10", activeBorder: "border-[#4ae176]/50", activeRing: "ring-[#4ae176]/25" },
+  { value: "moyenne", label: "Moyenne", color: "bg-[#c0c7d6]", activeBg: "bg-[#c0c7d6]/10", activeBorder: "border-[#c0c7d6]/50", activeRing: "ring-[#c0c7d6]/25" },
+  { value: "haute", label: "Haute", color: "bg-[#ffb4ab]", activeBg: "bg-[#ffb4ab]/10", activeBorder: "border-[#ffb4ab]/50", activeRing: "ring-[#ffb4ab]/25" },
 ];
 
 function createdAtMillis(createdAt) {
@@ -111,18 +111,35 @@ export default function SharedListView({
       </div>
 
       {/* Members */}
-      <MembersSection
-        members={members}
-        ownerId={list?.ownerId}
-        isOwner={isOwner}
-        currentUserId={currentUserId}
-        onRemoveMember={onRemoveMember}
-      />
-
-      {isOwner && <AddMemberForm formId={formId} onAddMember={onAddMember} />}
+      <details className="group rounded-xl border border-border bg-card">
+        <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-3 text-sm font-semibold text-foreground sm:px-5 [&::-webkit-details-marker]:hidden">
+          <span className="material-symbols-outlined text-primary-container transition-transform duration-200 group-open:rotate-90" style={{ fontSize: 20 }}>chevron_right</span>
+          <span className="material-symbols-outlined text-primary-container" style={{ fontSize: 18 }}>group</span>
+          Membres ({members.length})
+        </summary>
+        <div className="border-t border-border">
+          <MembersSection
+            members={members}
+            ownerId={list?.ownerId}
+            isOwner={isOwner}
+            currentUserId={currentUserId}
+            onRemoveMember={onRemoveMember}
+          />
+          {isOwner && <AddMemberForm formId={formId} onAddMember={onAddMember} />}
+        </div>
+      </details>
 
       {/* Add Task */}
-      <SharedTaskForm onAddTask={onAddTask} />
+      <details className="group rounded-xl border border-border bg-card">
+        <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-3 text-sm font-semibold text-foreground sm:px-5 [&::-webkit-details-marker]:hidden">
+          <span className="material-symbols-outlined text-primary-container transition-transform duration-200 group-open:rotate-90" style={{ fontSize: 20 }}>chevron_right</span>
+          <span className="material-symbols-outlined text-primary-container" style={{ fontSize: 18 }}>add_circle</span>
+          Ajouter une tâche
+        </summary>
+        <div className="border-t border-border">
+          <SharedTaskForm onAddTask={onAddTask} />
+        </div>
+      </details>
 
       {/* Tasks */}
       <section aria-label="Tâches partagées" className="flex flex-col gap-4">
@@ -136,7 +153,18 @@ export default function SharedListView({
           Tâches ({taskList.length})
         </h2>
 
-        <Dashboard tasks={taskList} />
+        {taskList.length > 0 && (
+          <details className="group rounded-xl border border-white/[0.08] bg-[#1f1f25]">
+            <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-3 text-sm font-semibold text-[#e4e1e9] sm:px-5 [&::-webkit-details-marker]:hidden">
+              <span className="material-symbols-outlined text-primary-container transition-transform duration-200 group-open:rotate-90" style={{ fontSize: 20 }}>chevron_right</span>
+              <span className="material-symbols-outlined text-primary-container" style={{ fontSize: 18 }}>monitoring</span>
+              Progression
+            </summary>
+            <div className="border-t border-white/[0.08] px-4 py-4 sm:px-5">
+              <Dashboard tasks={taskList} />
+            </div>
+          </details>
+        )}
 
         <div className="flex flex-col gap-3">
           <SearchBar
@@ -241,19 +269,9 @@ function MembersSection({
 
   return (
     <section
-      className="rounded-xl border border-border bg-card p-4 sm:p-5"
+      className="p-4 sm:p-5"
       aria-label="Membres de la liste"
     >
-      <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground sm:mb-4 sm:text-base">
-        <span
-          className="material-symbols-outlined text-primary-container"
-          style={{ fontSize: 20 }}
-        >
-          group
-        </span>
-        Membres ({memberList.length})
-      </h2>
-
       {memberList.length === 0 ? (
         <p className="text-sm text-muted">Aucun membre</p>
       ) : (
@@ -339,19 +357,9 @@ function AddMemberForm({ formId, onAddMember }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-xl border border-border bg-card p-4 sm:p-5"
+      className="border-t border-border p-4 sm:p-5"
       noValidate
     >
-      <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground sm:mb-4 sm:text-base">
-        <span
-          className="material-symbols-outlined text-primary-container"
-          style={{ fontSize: 20 }}
-        >
-          person_add
-        </span>
-        Ajouter un membre
-      </h2>
-
       {hasError && (
         <div
           id={errorId}
@@ -464,20 +472,10 @@ function SharedTaskForm({ onAddTask }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-xl border border-border bg-card p-4 sm:p-5"
+      className="p-4 sm:p-5"
       noValidate
       aria-describedby={submitError ? submitErrorId : undefined}
     >
-      <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground sm:mb-4 sm:text-base">
-        <span
-          className="material-symbols-outlined text-primary-container"
-          style={{ fontSize: 20 }}
-        >
-          add_task
-        </span>
-        Ajouter une tâche partagée
-      </h2>
-
       {submitError && (
         <div
           id={submitErrorId}
@@ -562,10 +560,10 @@ function SharedTaskForm({ onAddTask }) {
               {PRIORITIES.map((p) => (
                 <label
                   key={p.value}
-                  className={`flex cursor-pointer items-center gap-1.5 rounded-full border bg-[#35343a] px-2.5 py-1 text-xs font-medium transition-all duration-150 ${
+                  className={`flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-all duration-150 ${
                     priority === p.value
-                      ? "border-white/[0.04] ring-1 ring-white/20"
-                      : "border-white/[0.04]"
+                      ? `${p.activeBg} ${p.activeBorder} ring-1 ${p.activeRing}`
+                      : "border-white/[0.04] bg-[#35343a]"
                   }`}
                 >
                   <input

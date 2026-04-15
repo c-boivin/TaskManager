@@ -15,7 +15,7 @@ export default function Dashboard({ tasks }) {
   if (isEmpty) return null;
 
   return (
-    <div className="mb-4 flex flex-col gap-4">
+    <div className="flex flex-col gap-4">
       <ProgressBar percentage={progressPercent} label="Progression globale" />
       <TaskStats tasks={tasks} showProgress={false} />
     </div>

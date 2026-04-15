@@ -3,9 +3,9 @@
 import { useId, useState } from "react";
 
 const PRIORITIES = [
-  { value: "basse", label: "Basse", color: "bg-[#4ae176]" },
-  { value: "moyenne", label: "Moyenne", color: "bg-[#c0c7d6]" },
-  { value: "haute", label: "Haute", color: "bg-[#ffb4ab]" },
+  { value: "basse", label: "Basse", color: "bg-[#4ae176]", activeBg: "bg-[#4ae176]/10", activeBorder: "border-[#4ae176]/50", activeRing: "ring-[#4ae176]/25" },
+  { value: "moyenne", label: "Moyenne", color: "bg-[#c0c7d6]", activeBg: "bg-[#c0c7d6]/10", activeBorder: "border-[#c0c7d6]/50", activeRing: "ring-[#c0c7d6]/25" },
+  { value: "haute", label: "Haute", color: "bg-[#ffb4ab]", activeBg: "bg-[#ffb4ab]/10", activeBorder: "border-[#ffb4ab]/50", activeRing: "ring-[#ffb4ab]/25" },
 ];
 
 export default function AddTaskForm({ onAddTask }) {
@@ -56,7 +56,7 @@ export default function AddTaskForm({ onAddTask }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-xl border border-white/[0.08] bg-[#1f1f25] p-4 sm:p-5"
+      className="p-4 sm:p-5"
       noValidate
       aria-describedby={submitError ? submitErrorId : undefined}
     >
@@ -118,10 +118,10 @@ export default function AddTaskForm({ onAddTask }) {
               {PRIORITIES.map((p) => (
                 <label
                   key={p.value}
-                  className={`flex cursor-pointer items-center gap-1.5 rounded-full border bg-[#35343a] px-2.5 py-1 text-xs font-medium transition-all duration-150 ${
+                  className={`flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-all duration-150 ${
                     priority === p.value
-                      ? "border-white/[0.04] ring-1 ring-white/20"
-                      : "border-white/[0.04]"
+                      ? `${p.activeBg} ${p.activeBorder} ring-1 ${p.activeRing}`
+                      : "border-white/[0.04] bg-[#35343a]"
                   }`}
                 >
                   <input
