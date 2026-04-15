@@ -22,7 +22,28 @@ function sharedTasksRef(listId) {
   return collection(db, "sharedLists", listId, "tasks");
 }
 
+const FIRESTORE_ERROR_MESSAGES = {
+  "permission-denied": "Accès refusé. Vous n'avez pas la permission.",
+  "not-found": "Cette ressource n'existe plus.",
+  unavailable:
+    "Service temporairement indisponible. Vérifiez votre connexion.",
+  unauthenticated:
+    "Vous devez être connecté pour effectuer cette action.",
+};
+const DEFAULT_ERROR_MSG = "Une erreur est survenue. Veuillez réessayer.";
+
+function getUserFacingMessage(error) {
+  return FIRESTORE_ERROR_MESSAGES[error?.code] ?? null;
+}
+
 function wrapFirestoreError(prefix, error) {
+  const userMsg = getUserFacingMessage(error);
+  if (userMsg) {
+    const wrapped = new Error(userMsg);
+    wrapped.code = error.code;
+    wrapped.cause = error;
+    return wrapped;
+  }
   const msg = error?.message ?? String(error);
   const wrapped = new Error(`${prefix} : ${msg}`);
   wrapped.cause = error;
@@ -69,7 +90,7 @@ export async function getUserSharedLists(userId) {
   }
 }
 
-export function subscribeToSharedLists(userId, callback) {
+export function subscribeToSharedLists(userId, callback, onError) {
   if (!userId) throw new Error("userId est requis.");
 
   const q = query(sharedListsRef, where("members", "array-contains", userId));
@@ -87,9 +108,12 @@ export function subscribeToSharedLists(userId, callback) {
       );
     },
     (error) => {
-      console.error(
-        `[subscribeToSharedLists] Erreur d'écoute Firestore : ${error.message}`
-      );
+      const userMsg = getUserFacingMessage(error);
+      const wrapped = new Error(userMsg ?? DEFAULT_ERROR_MSG);
+      wrapped.code = error.code;
+      wrapped.cause = error;
+      console.error(`[subscribeToSharedLists] ${wrapped.message}`);
+      onError?.(wrapped);
     }
   );
 }
@@ -256,7 +280,7 @@ export async function deleteSharedTask(listId, taskId) {
   }
 }
 
-export function subscribeToSharedTasks(listId, callback) {
+export function subscribeToSharedTasks(listId, callback, onError) {
   if (!listId) throw new Error("listId est requis.");
 
   const q = query(sharedTasksRef(listId), orderBy("createdAt", "desc"));
@@ -271,9 +295,12 @@ export function subscribeToSharedTasks(listId, callback) {
       );
     },
     (error) => {
-      console.error(
-        `[subscribeToSharedTasks] Erreur d'écoute Firestore : ${error.message}`
-      );
+      const userMsg = getUserFacingMessage(error);
+      const wrapped = new Error(userMsg ?? DEFAULT_ERROR_MSG);
+      wrapped.code = error.code;
+      wrapped.cause = error;
+      console.error(`[subscribeToSharedTasks] ${wrapped.message}`);
+      onError?.(wrapped);
     }
   );
 }

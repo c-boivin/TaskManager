@@ -32,7 +32,28 @@ function requireTaskId(taskId) {
   }
 }
 
+const FIRESTORE_ERROR_MESSAGES = {
+  "permission-denied": "Accès refusé. Vous n'avez pas la permission.",
+  "not-found": "Cette ressource n'existe plus.",
+  unavailable:
+    "Service temporairement indisponible. Vérifiez votre connexion.",
+  unauthenticated:
+    "Vous devez être connecté pour effectuer cette action.",
+};
+const DEFAULT_ERROR_MSG = "Une erreur est survenue. Veuillez réessayer.";
+
+function getUserFacingMessage(error) {
+  return FIRESTORE_ERROR_MESSAGES[error?.code] ?? null;
+}
+
 function wrapFirestoreError(prefix, error) {
+  const userMsg = getUserFacingMessage(error);
+  if (userMsg) {
+    const wrapped = new Error(userMsg);
+    wrapped.code = error.code;
+    wrapped.cause = error;
+    return wrapped;
+  }
   const msg = error?.message ?? String(error);
   const wrapped = new Error(`${prefix} : ${msg}`);
   wrapped.cause = error;
@@ -164,10 +185,19 @@ export function subscribeToTasks(userId, callback, onError) {
         callback(snapshot.docs.map(mapDocToTask));
       },
       (error) => {
-        console.error(
-          `[subscribeToTasks] Erreur d'écoute Firestore pour l'utilisateur "${userId}" : ${error.message}`
-        );
-        onError?.(error);
+        const userMsg = getUserFacingMessage(error);
+        if (userMsg) {
+          const wrapped = new Error(userMsg);
+          wrapped.code = error.code;
+          wrapped.cause = error;
+          console.error(`[subscribeToTasks] ${userMsg}`);
+          onError?.(wrapped);
+        } else {
+          console.error(
+            `[subscribeToTasks] Erreur d'écoute Firestore pour l'utilisateur "${userId}" : ${error.message}`
+          );
+          onError?.(error);
+        }
       }
     );
   } catch (error) {
