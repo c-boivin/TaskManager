@@ -9,7 +9,21 @@ import {
   signInWithPopup,
   signOut as firebaseSignOut,
 } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { doc, setDoc } from "firebase/firestore";
+import { auth, db } from "@/lib/firebase";
+
+async function saveUserProfile(firebaseUser) {
+  if (!firebaseUser) return;
+  try {
+    await setDoc(
+      doc(db, "users", firebaseUser.uid),
+      { email: firebaseUser.email ?? null },
+      { merge: true },
+    );
+  } catch {
+    // Non-blocking: profile save failure shouldn't break auth flow
+  }
+}
 
 const googleProvider = new GoogleAuthProvider();
 
@@ -46,6 +60,7 @@ export function AuthProvider({ children }) {
       setUser(currentUser);
       setError(null);
       setLoading(false);
+      saveUserProfile(currentUser);
     });
     return () => unsubscribe();
   }, []);
