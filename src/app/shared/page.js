@@ -206,8 +206,8 @@ export default function SharedPage() {
   return (
     <AuthGuard>
       <ToastContainer toasts={toasts} onDismiss={dismiss} />
-      <div className="flex min-h-screen flex-col items-center bg-zinc-50 px-6 py-12 font-sans text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50">
-        <main className="flex w-full max-w-lg flex-col items-center gap-8">
+      <div className="flex flex-1 flex-col items-center px-4 py-6 sm:px-6 sm:py-10">
+        <div className="w-full max-w-4xl">
           {activeList ? (
             <SharedListView
               list={activeList}
@@ -223,48 +223,46 @@ export default function SharedPage() {
             />
           ) : (
             <>
-              <h1 className="text-4xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50 sm:text-5xl">
-                Listes partagées
-              </h1>
-
-              <div className="w-full">
-                <CreateListForm onCreateList={handleCreateList} />
+              <div className="mb-6 sm:mb-8">
+                <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-3xl">
+                  Listes partagées
+                </h1>
+                <p className="mt-1 text-sm text-muted">
+                  Collaborez avec votre équipe en temps réel
+                </p>
               </div>
 
+              <CreateListForm onCreateList={handleCreateList} />
+
               {error && (
-                <p
-                  className="w-full rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200"
-                  role="alert"
-                >
-                  {error}
-                </p>
+                <div className="mt-6 rounded-xl border border-error/20 bg-error/5 px-4 py-3 text-sm text-error" role="alert">
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined" style={{ fontSize: 18 }}>error</span>
+                    {error}
+                  </div>
+                </div>
               )}
 
               {loading ? (
-                <div
-                  role="status"
-                  aria-live="polite"
-                  className="flex w-full flex-col gap-4"
-                >
+                <div role="status" aria-live="polite" className="mt-6 grid gap-4 sm:grid-cols-2">
                   <span className="sr-only">Chargement des listes...</span>
                   {[1, 2, 3].map((i) => (
-                    <div
-                      key={i}
-                      className="animate-pulse rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-700 dark:bg-zinc-950"
-                    >
-                      <div className="mb-3 h-5 w-2/3 rounded bg-zinc-200 dark:bg-zinc-700" />
-                      <div className="mb-3 h-4 w-1/2 rounded bg-zinc-100 dark:bg-zinc-800" />
-                      <div className="h-9 w-24 rounded-lg bg-zinc-200 dark:bg-zinc-700" />
+                    <div key={i} className="animate-pulse rounded-xl border border-border bg-card p-5">
+                      <div className="mb-3 h-5 w-2/3 rounded bg-white/5" />
+                      <div className="mb-3 h-1 w-full rounded-full bg-white/5" />
+                      <div className="mb-4 h-4 w-1/2 rounded bg-white/5" />
+                      <div className="h-9 w-24 rounded-lg bg-white/5" />
                     </div>
                   ))}
                 </div>
               ) : lists.length === 0 ? (
-                <p className="py-8 text-center text-zinc-700 dark:text-zinc-300">
-                  Aucune liste partagée pour le moment.
-                </p>
+                <div className="mt-12 flex flex-col items-center gap-3 py-12">
+                  <span className="material-symbols-outlined text-muted/30" style={{ fontSize: 48 }}>folder_shared</span>
+                  <p className="text-muted">Aucune liste partagée pour le moment.</p>
+                </div>
               ) : (
                 <section
-                  className="flex w-full flex-col gap-4"
+                  className="mt-6 grid gap-4 sm:grid-cols-2"
                   aria-label="Vos listes partagées"
                 >
                   {lists.map((list) => (
@@ -280,7 +278,7 @@ export default function SharedPage() {
               )}
             </>
           )}
-        </main>
+        </div>
       </div>
     </AuthGuard>
   );

@@ -10,9 +10,9 @@ import FilterBar, {
 import TaskItem from "./TaskItem";
 
 const PRIORITIES = [
-  { value: "haute", label: "Haute" },
-  { value: "moyenne", label: "Moyenne" },
-  { value: "basse", label: "Basse" },
+  { value: "basse", label: "Basse", color: "bg-[#4ae176]" },
+  { value: "moyenne", label: "Moyenne", color: "bg-[#c0c7d6]" },
+  { value: "haute", label: "Haute", color: "bg-[#ffb4ab]" },
 ];
 
 function createdAtMillis(createdAt) {
@@ -20,9 +20,23 @@ function createdAtMillis(createdAt) {
   if (typeof createdAt === "number") return createdAt;
   if (typeof createdAt?.toMillis === "function") return createdAt.toMillis();
   if (typeof createdAt?.seconds === "number") {
-    return createdAt.seconds * 1000 + Math.floor((createdAt.nanoseconds ?? 0) / 1e6);
+    return (
+      createdAt.seconds * 1000 + Math.floor((createdAt.nanoseconds ?? 0) / 1e6)
+    );
   }
   return 0;
+}
+
+const AVATAR_COLORS = [
+  "bg-primary-container/20 text-primary",
+  "bg-tertiary/20 text-tertiary",
+  "bg-amber-500/20 text-amber-400",
+  "bg-pink-500/20 text-pink-400",
+  "bg-cyan-500/20 text-cyan-400",
+];
+
+function getAvatarColor(index) {
+  return AVATAR_COLORS[index % AVATAR_COLORS.length];
 }
 
 export default function SharedListView({
@@ -58,7 +72,9 @@ export default function SharedListView({
       .filter((task) => {
         if (q === "") return true;
         const inTitle = (task.title ?? "").toLowerCase().includes(q);
-        const inDescription = (task.description ?? "").toLowerCase().includes(q);
+        const inDescription = (task.description ?? "")
+          .toLowerCase()
+          .includes(q);
         return inTitle || inDescription;
       })
       .filter((task) => {
@@ -77,34 +93,24 @@ export default function SharedListView({
 
   return (
     <div className="flex w-full flex-col gap-6">
-      <div className="flex items-center gap-3">
+      {/* Header */}
+      <div className="flex items-center gap-2 sm:gap-3">
         <button
           type="button"
           onClick={onBack}
-          className="flex-shrink-0 rounded-lg p-2 text-zinc-600 transition-colors hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
+          className="shrink-0 rounded-lg border border-border p-1.5 text-muted transition-all duration-150 hover:bg-white/5 hover:text-foreground active:scale-95 sm:p-2"
           aria-label="Retour à la vue principale"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden
-          >
-            <path d="M19 12H5" />
-            <polyline points="12 19 5 12 12 5" />
-          </svg>
+          <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
+            arrow_back
+          </span>
         </button>
-        <h1 className="truncate text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+        <h1 className="truncate text-lg font-bold tracking-tight text-foreground sm:text-xl">
           {list?.name ?? "Liste partagée"}
         </h1>
       </div>
 
+      {/* Members */}
       <MembersSection
         members={members}
         ownerId={list?.ownerId}
@@ -115,82 +121,96 @@ export default function SharedListView({
 
       {isOwner && <AddMemberForm formId={formId} onAddMember={onAddMember} />}
 
+      {/* Add Task */}
       <SharedTaskForm onAddTask={onAddTask} />
 
+      {/* Tasks */}
       <section aria-label="Tâches partagées" className="flex flex-col gap-4">
-        <h2 className="text-base font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+        <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
+          <span
+            className="material-symbols-outlined text-primary-container"
+            style={{ fontSize: 20 }}
+          >
+            checklist
+          </span>
           Tâches ({taskList.length})
         </h2>
 
         <Dashboard tasks={taskList} />
 
-        <SearchBar
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-
-        <div className="flex flex-col gap-1">
-          <FilterBar
-            currentFilter={statusFilter}
-            onFilterChange={setStatusFilter}
+        <div className="flex flex-col gap-3">
+          <SearchBar
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <p
-            className="text-sm text-zinc-700 dark:text-zinc-300"
-            aria-live="polite"
-          >
-            {activeCount === 1
-              ? `1 tâche active sur ${totalCount}`
-              : `${activeCount} tâches actives sur ${totalCount}`}
-          </p>
-        </div>
-
-        <div>
-          <label
-            htmlFor="shared-task-sort-order"
-            className="mb-1 block text-xs font-medium text-zinc-700 dark:text-zinc-300"
-          >
-            Trier par
-          </label>
-          <select
-            id="shared-task-sort-order"
-            value={sortOrder}
-            onChange={(e) => setSortOrder(e.target.value)}
-            className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-50"
-          >
-            <option value="priority">Priorité (hautes → basses)</option>
-            <option value="date">Date (plus anciennes d&apos;abord)</option>
-          </select>
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <FilterBar
+              currentFilter={statusFilter}
+              onFilterChange={setStatusFilter}
+            />
+            <select
+              id="shared-task-sort-order"
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value)}
+              className="rounded-lg border border-white/[0.08] bg-[#1f1f25] px-3 py-2 text-sm text-[#8d90a0] focus:outline-none focus:ring-1 focus:ring-[#b5c4ff]/30"
+              aria-label="Trier par"
+            >
+              <option value="priority">Priorité</option>
+              <option value="date">Date</option>
+            </select>
+            <span className="ml-auto text-xs text-[#8d90a0]" aria-live="polite">
+              {activeCount === 1
+                ? `1 tâche active sur ${totalCount}`
+                : `${activeCount} actives sur ${totalCount}`}
+            </span>
+          </div>
         </div>
 
         {taskList.length > 0 && visibleTasks.length === 0 ? (
-          <p className="py-8 text-center text-zinc-700 dark:text-zinc-300">
+          <p className="py-8 text-center text-muted">
             Aucune tâche ne correspond à ces critères.
           </p>
         ) : taskList.length === 0 ? (
-          <p className="py-8 text-center text-zinc-700 dark:text-zinc-300">
-            Aucune tâche pour le moment
-          </p>
+          <div className="flex flex-col items-center gap-3 py-12">
+            <span
+              className="material-symbols-outlined text-muted/30"
+              style={{ fontSize: 48 }}
+            >
+              task
+            </span>
+            <p className="text-muted">Aucune tâche pour le moment</p>
+          </div>
         ) : (
-          <ul className="flex flex-col gap-4" aria-label="Liste des tâches partagées">
+          <ul
+            className="flex flex-col gap-2"
+            aria-label="Liste des tâches partagées"
+          >
             {visibleTasks.map((task) => (
               <li key={task.id}>
                 <div className="relative">
                   <TaskItem
                     id={task.id}
                     title={task.title}
-                    description={typeof task.description === "string" ? task.description : ""}
+                    description={
+                      typeof task.description === "string"
+                        ? task.description
+                        : ""
+                    }
                     priority={task.priority}
                     completed={task.completed}
-                    onToggle={(id) => onUpdateTask(id, { completed: !task.completed })}
+                    onToggle={(id) =>
+                      onUpdateTask(id, { completed: !task.completed })
+                    }
                     onDelete={onDeleteTask}
                   />
                   {task.addedBy && (
-                    <span className="mt-1 block text-right text-xs text-zinc-500 dark:text-zinc-400">
+                    <span className="mt-1 block text-right text-xs text-muted">
                       Ajoutée par{" "}
-                      <span className="font-medium">
+                      <span className="font-medium text-foreground/70">
                         {task.addedBy === currentUserId
                           ? "vous"
-                          : members?.find((m) => m.uid === task.addedBy)?.email ?? task.addedBy}
+                          : (members?.find((m) => m.uid === task.addedBy)
+                              ?.email ?? task.addedBy)}
                       </span>
                     </span>
                   )}
@@ -204,7 +224,13 @@ export default function SharedListView({
   );
 }
 
-function MembersSection({ members, ownerId, isOwner, currentUserId, onRemoveMember }) {
+function MembersSection({
+  members,
+  ownerId,
+  isOwner,
+  currentUserId,
+  onRemoveMember,
+}) {
   const memberList = members ?? [];
 
   const sortedMembers = [...memberList].sort((a, b) => {
@@ -215,45 +241,47 @@ function MembersSection({ members, ownerId, isOwner, currentUserId, onRemoveMemb
 
   return (
     <section
-      className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
+      className="rounded-xl border border-border bg-card p-4 sm:p-5"
       aria-label="Membres de la liste"
     >
-      <h2 className="mb-3 text-base font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+      <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground sm:mb-4 sm:text-base">
+        <span
+          className="material-symbols-outlined text-primary-container"
+          style={{ fontSize: 20 }}
+        >
+          group
+        </span>
         Membres ({memberList.length})
       </h2>
 
       {memberList.length === 0 ? (
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">Aucun membre</p>
+        <p className="text-sm text-muted">Aucun membre</p>
       ) : (
         <ul className="flex flex-col gap-2">
-          {sortedMembers.map((member) => {
+          {sortedMembers.map((member, index) => {
             const isMemberOwner = member.uid === ownerId;
 
             return (
               <li
                 key={member.uid}
-                className="flex items-center justify-between rounded-lg border border-zinc-100 px-3 py-2 dark:border-zinc-700"
+                className="flex items-center justify-between gap-2 rounded-lg border border-border px-2.5 py-2 transition-colors hover:bg-white/[0.02] sm:px-3"
               >
-                <div className="flex min-w-0 items-center gap-2">
+                <div className="flex min-w-0 items-center gap-2 sm:gap-3">
                   <div
-                    className={
-                      isMemberOwner
-                        ? "flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-amber-100 text-sm font-medium text-amber-800 dark:bg-amber-900/50 dark:text-amber-200"
-                        : "flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-zinc-200 text-sm font-medium text-zinc-700 dark:bg-zinc-700 dark:text-zinc-200"
-                    }
+                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold sm:h-8 sm:w-8 sm:text-sm ${getAvatarColor(index)}`}
                   >
                     {(member.email?.[0] ?? "?").toUpperCase()}
                   </div>
-                  <span className="truncate text-sm text-zinc-800 dark:text-zinc-200">
+                  <span className="truncate text-xs text-foreground sm:text-sm">
                     {member.email ?? member.uid}
                   </span>
                   {isMemberOwner && (
-                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
+                    <span className="hidden shrink-0 rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-400 sm:inline sm:text-xs">
                       Propriétaire
                     </span>
                   )}
                   {member.uid === currentUserId && (
-                    <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900/40 dark:text-blue-300">
+                    <span className="hidden shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary sm:inline sm:text-xs">
                       vous
                     </span>
                   )}
@@ -263,7 +291,7 @@ function MembersSection({ members, ownerId, isOwner, currentUserId, onRemoveMemb
                   <button
                     type="button"
                     onClick={() => onRemoveMember(member.uid)}
-                    className="flex-shrink-0 rounded-lg px-2 py-1 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40"
+                    className="shrink-0 rounded-lg px-2 py-1 text-xs font-medium text-error/70 transition-colors hover:bg-error/10 hover:text-error"
                     aria-label={`Retirer ${member.email ?? member.uid}`}
                   >
                     Retirer
@@ -311,57 +339,76 @@ function AddMemberForm({ formId, onAddMember }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
+      className="rounded-xl border border-border bg-card p-4 sm:p-5"
       noValidate
     >
-      <h2 className="mb-3 text-base font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+      <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground sm:mb-4 sm:text-base">
+        <span
+          className="material-symbols-outlined text-primary-container"
+          style={{ fontSize: 20 }}
+        >
+          person_add
+        </span>
         Ajouter un membre
       </h2>
 
       {hasError && (
-        <p
+        <div
           id={errorId}
-          className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-left text-sm text-red-800 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200"
+          className="mb-3 rounded-lg border border-error/20 bg-error/5 px-3 py-2 text-sm text-error"
           role="alert"
         >
           {error}
-        </p>
+        </div>
       )}
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-        <div className="min-w-0 flex-grow text-left">
+        <div className="min-w-0 flex-grow">
           <label
             htmlFor={emailId}
-            className="mb-1 block text-xs font-medium text-zinc-600 dark:text-zinc-400"
+            className="mb-1.5 block text-sm font-medium text-foreground"
           >
             Email du membre
           </label>
-          <input
-            id={emailId}
-            type="email"
-            required
-            aria-required="true"
-            aria-invalid={hasError}
-            aria-describedby={hasError ? errorId : undefined}
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              if (error) setError("");
-            }}
-            placeholder="nom@exemple.com"
-            className={
-              hasError
-                ? "w-full rounded-lg border border-red-500 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-500/25 dark:border-red-500 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-500"
-                : "w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-500"
-            }
-          />
+          <div className="relative">
+            <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-muted">
+              <span
+                className="material-symbols-outlined"
+                style={{ fontSize: 18 }}
+              >
+                mail
+              </span>
+            </span>
+            <input
+              id={emailId}
+              type="email"
+              required
+              aria-required="true"
+              aria-invalid={hasError}
+              aria-describedby={hasError ? errorId : undefined}
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (error) setError("");
+              }}
+              placeholder="nom@exemple.com"
+              className={`w-full rounded-lg border bg-[#0e0e13] py-2.5 pl-10 pr-3 text-sm text-foreground placeholder:text-muted/60 focus:outline-none focus:ring-2 ${
+                hasError
+                  ? "border-error/40 focus:ring-error/20"
+                  : "border-border focus:border-primary/40 focus:ring-primary/20"
+              }`}
+            />
+          </div>
         </div>
         <button
           type="submit"
           disabled={isSubmitting}
           aria-busy={isSubmitting}
-          className="h-[42px] w-full shrink-0 rounded-lg bg-zinc-900 px-4 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:disabled:opacity-60 sm:w-auto"
+          className="inline-flex h-[42px] items-center justify-center gap-2 rounded-lg bg-gradient-to-br from-primary to-primary-container px-5 text-sm font-semibold text-surface transition-all duration-150 hover:shadow-lg hover:shadow-primary-container/20 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
         >
+          <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+            person_add
+          </span>
           {isSubmitting ? "Ajout…" : "Ajouter"}
         </button>
       </div>
@@ -372,7 +419,6 @@ function AddMemberForm({ formId, onAddMember }) {
 function SharedTaskForm({ onAddTask }) {
   const formId = useId();
   const titleId = `${formId}-title`;
-  const priorityId = `${formId}-priority`;
   const titleErrorId = `${formId}-title-error`;
   const submitErrorId = `${formId}-submit-error`;
 
@@ -398,12 +444,18 @@ function SharedTaskForm({ onAddTask }) {
 
     setIsSubmitting(true);
     try {
-      await onAddTask({ title: trimmed, description: description.trim(), priority });
+      await onAddTask({
+        title: trimmed,
+        description: description.trim(),
+        priority,
+      });
       setTitle("");
       setDescription("");
       setPriority("moyenne");
     } catch (err) {
-      setSubmitError(err?.message ?? "L'ajout de la tâche a échoué. Réessayez.");
+      setSubmitError(
+        err?.message ?? "L'ajout de la tâche a échoué. Réessayez.",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -412,56 +464,72 @@ function SharedTaskForm({ onAddTask }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="w-full rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
+      className="rounded-xl border border-border bg-card p-4 sm:p-5"
       noValidate
       aria-describedby={submitError ? submitErrorId : undefined}
     >
-      <h2 className="mb-4 text-center text-base font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+      <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground sm:mb-4 sm:text-base">
+        <span
+          className="material-symbols-outlined text-primary-container"
+          style={{ fontSize: 20 }}
+        >
+          add_task
+        </span>
         Ajouter une tâche partagée
       </h2>
 
       {submitError && (
-        <p
+        <div
           id={submitErrorId}
-          className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-left text-sm text-red-800 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200"
+          className="mb-4 rounded-lg border border-error/20 bg-error/5 px-3 py-2 text-sm text-error"
           role="alert"
         >
           {submitError}
-        </p>
+        </div>
       )}
 
-      <div className="flex flex-col gap-3">
-        <div className="min-w-0 text-left">
+      <div className="flex flex-col gap-4">
+        <div>
           <label
             htmlFor={titleId}
-            className="mb-1 block text-xs font-medium text-zinc-600 dark:text-zinc-400"
+            className="mb-1.5 block text-sm font-medium text-foreground"
           >
-            Titre <span className="text-red-600 dark:text-red-400">(obligatoire)</span>
+            Titre <span className="text-error">*</span>
           </label>
-          <input
-            id={titleId}
-            name="title"
-            type="text"
-            required
-            aria-required="true"
-            aria-invalid={titleInvalid}
-            aria-describedby={titleInvalid ? titleErrorId : undefined}
-            value={title}
-            onChange={(e) => {
-              setTitle(e.target.value);
-              if (titleError) setTitleError("");
-            }}
-            placeholder="Nom de la tâche"
-            className={
-              titleInvalid
-                ? "w-full rounded-lg border border-red-500 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-500/25 dark:border-red-500 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-500"
-                : "w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-500"
-            }
-          />
+          <div className="relative">
+            <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-muted">
+              <span
+                className="material-symbols-outlined"
+                style={{ fontSize: 18 }}
+              >
+                edit
+              </span>
+            </span>
+            <input
+              id={titleId}
+              name="title"
+              type="text"
+              required
+              aria-required="true"
+              aria-invalid={titleInvalid}
+              aria-describedby={titleInvalid ? titleErrorId : undefined}
+              value={title}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                if (titleError) setTitleError("");
+              }}
+              placeholder="Nom de la tâche"
+              className={`w-full rounded-lg border bg-[#0e0e13] py-2.5 pl-10 pr-3 text-sm text-foreground placeholder:text-muted/60 focus:outline-none focus:ring-2 ${
+                titleInvalid
+                  ? "border-error/40 focus:ring-error/20"
+                  : "border-border focus:border-primary/40 focus:ring-primary/20"
+              }`}
+            />
+          </div>
           {titleInvalid && (
             <p
               id={titleErrorId}
-              className="mt-1 text-left text-xs text-red-600 dark:text-red-400"
+              className="mt-1.5 text-xs text-error"
               role="alert"
             >
               {titleError}
@@ -469,12 +537,12 @@ function SharedTaskForm({ onAddTask }) {
           )}
         </div>
 
-        <div className="min-w-0 text-left">
+        <div>
           <label
             htmlFor={descriptionId}
-            className="mb-1 block text-xs font-medium text-zinc-600 dark:text-zinc-400"
+            className="mb-1.5 block text-sm font-medium text-foreground"
           >
-            Description
+            Description <span className="text-muted">(optionnel)</span>
           </label>
           <textarea
             id={descriptionId}
@@ -482,39 +550,51 @@ function SharedTaskForm({ onAddTask }) {
             rows={2}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Détails de la tâche (optionnel)"
-            className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-500"
+            placeholder="Détails de la tâche"
+            className="w-full resize-y rounded-lg border border-border bg-[#0e0e13] px-3 py-2.5 text-sm text-foreground placeholder:text-muted/60 focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
         </div>
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-3">
-          <div className="w-full text-left sm:w-40">
-            <label
-              htmlFor={priorityId}
-              className="mb-1 block text-xs font-medium text-zinc-600 dark:text-zinc-400"
-            >
-              Priorité
-            </label>
-            <select
-              id={priorityId}
-              name="priority"
-              value={priority}
-              onChange={(e) => setPriority(e.target.value)}
-              className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-50"
-            >
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <fieldset>
+            <legend className="sr-only">Priorité</legend>
+            <div className="flex gap-2">
               {PRIORITIES.map((p) => (
-                <option key={p.value} value={p.value}>
-                  {p.label}
-                </option>
+                <label
+                  key={p.value}
+                  className={`flex cursor-pointer items-center gap-1.5 rounded-full border bg-[#35343a] px-2.5 py-1 text-xs font-medium transition-all duration-150 ${
+                    priority === p.value
+                      ? "border-white/[0.04] ring-1 ring-white/20"
+                      : "border-white/[0.04]"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="shared-priority"
+                    value={p.value}
+                    checked={priority === p.value}
+                    onChange={() => setPriority(p.value)}
+                    className="sr-only"
+                  />
+                  <span className={`h-2 w-2 rounded-full ${p.color}`} />
+                  <span className="text-[#e4e1e9]">{p.label}</span>
+                </label>
               ))}
-            </select>
-          </div>
+            </div>
+          </fieldset>
+
           <button
             type="submit"
             disabled={isSubmitting}
             aria-busy={isSubmitting}
-            className="h-[42px] w-full shrink-0 rounded-lg bg-zinc-900 px-4 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:disabled:opacity-60 sm:ml-auto sm:w-auto"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-gradient-to-br from-primary to-primary-container px-5 text-sm font-semibold text-surface transition-all duration-150 hover:shadow-lg hover:shadow-primary-container/20 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
           >
+            <span
+              className="material-symbols-outlined"
+              style={{ fontSize: 18 }}
+            >
+              add
+            </span>
             {isSubmitting ? "Ajout…" : "Ajouter"}
           </button>
         </div>

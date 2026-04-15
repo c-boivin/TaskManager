@@ -43,70 +43,69 @@ export default function CreateListForm({ onCreateList }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="w-full rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
+      className="rounded-xl border border-border bg-card p-4 sm:p-5"
       noValidate
       aria-describedby={submitError ? submitErrorId : undefined}
     >
-      <h2 className="mb-4 text-center text-base font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+      <h2 className="mb-4 flex items-center gap-2 text-base font-semibold text-foreground">
+        <span className="material-symbols-outlined text-primary-container" style={{ fontSize: 20 }}>playlist_add</span>
         Créer une nouvelle liste
       </h2>
 
-      {submitError ? (
-        <p
+      {submitError && (
+        <div
           id={submitErrorId}
-          className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-left text-sm text-red-800 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200"
+          className="mb-4 rounded-lg border border-error/20 bg-error/5 px-3 py-2 text-sm text-error"
           role="alert"
         >
           {submitError}
-        </p>
-      ) : null}
+        </div>
+      )}
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-        <div className="min-w-0 flex-1 text-left">
-          <label
-            htmlFor={nameId}
-            className="mb-1 block text-xs font-medium text-zinc-600 dark:text-zinc-400"
-          >
-            Nom de la liste{" "}
-            <span className="text-red-600 dark:text-red-400">(obligatoire)</span>
+        <div className="min-w-0 flex-1">
+          <label htmlFor={nameId} className="mb-1.5 block text-sm font-medium text-foreground">
+            Nom de la liste <span className="text-error">*</span>
           </label>
-          <input
-            id={nameId}
-            name="name"
-            type="text"
-            required
-            aria-required="true"
-            aria-invalid={nameInvalid}
-            aria-describedby={nameInvalid ? nameErrorId : undefined}
-            value={name}
-            onChange={(e) => {
-              setName(e.target.value);
-              if (nameError) setNameError("");
-            }}
-            placeholder="Ex : Courses, Vacances…"
-            className={
-              nameInvalid
-                ? "w-full rounded-lg border border-red-500 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-500/25 dark:border-red-500 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-500"
-                : "w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-500"
-            }
-          />
-          {nameInvalid ? (
-            <p
-              id={nameErrorId}
-              className="mt-1 text-left text-xs text-red-600 dark:text-red-400"
-              role="alert"
-            >
+          <div className="relative">
+            <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-muted">
+              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>edit</span>
+            </span>
+            <input
+              id={nameId}
+              name="name"
+              type="text"
+              required
+              aria-required="true"
+              aria-invalid={nameInvalid}
+              aria-describedby={nameInvalid ? nameErrorId : undefined}
+              value={name}
+              onChange={(e) => {
+                setName(e.target.value);
+                if (nameError) setNameError("");
+              }}
+              placeholder="Ex : Courses, Vacances…"
+              className={`w-full rounded-lg border bg-[#0e0e13] py-2.5 pl-10 pr-3 text-sm text-foreground placeholder:text-muted/60 focus:outline-none focus:ring-2 ${
+                nameInvalid
+                  ? "border-error/40 focus:ring-error/20"
+                  : "border-border focus:border-primary/40 focus:ring-primary/20"
+              }`}
+            />
+          </div>
+          {nameInvalid && (
+            <p id={nameErrorId} className="mt-1.5 text-xs text-error" role="alert">
               {nameError}
             </p>
-          ) : null}
+          )}
         </div>
 
         <button
           type="submit"
           disabled={isSubmitting}
           aria-busy={isSubmitting}
-          className="h-[42px] w-full shrink-0 rounded-lg bg-zinc-900 px-4 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200 dark:disabled:opacity-60 sm:w-auto"
+          className="inline-flex h-[42px] items-center justify-center gap-2 rounded-lg bg-gradient-to-br from-primary to-primary-container px-5 text-sm font-semibold text-surface transition-all duration-150 hover:shadow-lg hover:shadow-primary-container/20 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
         >
+          <span className="material-symbols-outlined" style={{ fontSize: 18 }}>add</span>
           {isSubmitting ? "Création…" : "Créer"}
         </button>
       </div>
