@@ -1,38 +1,13 @@
 "use client";
 
-import { createContext, useCallback, useEffect, useMemo, useState } from "react";
-import {
-  GoogleAuthProvider,
-  createUserWithEmailAndPassword,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  signInWithPopup,
-  signOut as firebaseSignOut,
-} from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
-import { auth, db } from "@/lib/firebase";
-
-async function saveUserProfile(firebaseUser) {
-  if (!firebaseUser) return;
-  try {
-    await setDoc(
-      doc(db, "users", firebaseUser.uid),
-      { email: firebaseUser.email ?? null },
-      { merge: true },
-    );
-  } catch {
-    // Non-blocking: profile save failure shouldn't break auth flow
-  }
-}
-
-const googleProvider = new GoogleAuthProvider();
+import { createContext, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const AUTH_ERROR_MESSAGES = {
   "auth/email-already-in-use": "Cette adresse e-mail est déjà utilisée.",
   "auth/invalid-email": "L'adresse e-mail n'est pas valide.",
   "auth/weak-password": "Le mot de passe doit contenir au moins 6 caractères.",
-  "auth/user-not-found": "Aucun compte trouvé avec cette adresse e-mail.",
-  "auth/wrong-password": "Mot de passe incorrect.",
+  "auth/user-not-found": "Identifiants invalides. Vérifiez votre e-mail et mot de passe.",
+  "auth/wrong-password": "Identifiants invalides. Vérifiez votre e-mail et mot de passe.",
   "auth/too-many-requests": "Trop de tentatives. Réessayez plus tard.",
   "auth/invalid-credential": "Identifiants invalides. Vérifiez votre e-mail et mot de passe.",
   "auth/popup-closed-by-user":
@@ -48,21 +23,61 @@ function mapAuthError(code) {
   return "Une erreur est survenue. Veuillez réessayer.";
 }
 
+let _firebasePromise = null;
+function getFirebase() {
+  if (!_firebasePromise) {
+    _firebasePromise = Promise.all([
+      import("firebase/auth"),
+      import("firebase/firestore"),
+      import("@/lib/firebase"),
+    ]).then(([authMod, firestoreMod, firebaseMod]) => ({
+      authMod,
+      firestoreMod,
+      auth: firebaseMod.auth,
+      db: firebaseMod.db,
+    })).catch((e) => {
+      _firebasePromise = null;
+      throw e;
+    });
+  }
+  return _firebasePromise;
+}
+
+async function saveUserProfile(firebaseUser) {
+  if (!firebaseUser) return;
+  try {
+    const { firestoreMod, db } = await getFirebase();
+    await firestoreMod.setDoc(
+      firestoreMod.doc(db, "users", firebaseUser.uid),
+      { email: firebaseUser.email ?? null },
+      { merge: true },
+    );
+  } catch {
+    // Non-blocking: profile save failure shouldn't break auth flow
+  }
+}
+
 export const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const googleProviderRef = useRef(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setError(null);
-      setLoading(false);
-      saveUserProfile(currentUser);
+    let unsubscribe;
+
+    getFirebase().then(({ authMod, auth }) => {
+      unsubscribe = authMod.onAuthStateChanged(auth, (currentUser) => {
+        setUser(currentUser);
+        setError(null);
+        setLoading(false);
+        saveUserProfile(currentUser);
+      });
     });
-    return () => unsubscribe();
+
+    return () => unsubscribe?.();
   }, []);
 
   const handleAuthError = useCallback((err) => {
@@ -75,7 +90,8 @@ export function AuthProvider({ children }) {
     async (email, password) => {
       setError(null);
       try {
-        await createUserWithEmailAndPassword(auth, email, password);
+        const { authMod, auth } = await getFirebase();
+        await authMod.createUserWithEmailAndPassword(auth, email, password);
       } catch (e) {
         handleAuthError(e);
         throw e;
@@ -88,7 +104,8 @@ export function AuthProvider({ children }) {
     async (email, password) => {
       setError(null);
       try {
-        await signInWithEmailAndPassword(auth, email, password);
+        const { authMod, auth } = await getFirebase();
+        await authMod.signInWithEmailAndPassword(auth, email, password);
       } catch (e) {
         handleAuthError(e);
         throw e;
@@ -100,7 +117,11 @@ export function AuthProvider({ children }) {
   const signInWithGoogle = useCallback(async () => {
     setError(null);
     try {
-      await signInWithPopup(auth, googleProvider);
+      const { authMod, auth } = await getFirebase();
+      if (!googleProviderRef.current) {
+        googleProviderRef.current = new authMod.GoogleAuthProvider();
+      }
+      await authMod.signInWithPopup(auth, googleProviderRef.current);
     } catch (e) {
       handleAuthError(e);
       throw e;
@@ -110,7 +131,8 @@ export function AuthProvider({ children }) {
   const signOut = useCallback(async () => {
     setError(null);
     try {
-      await firebaseSignOut(auth);
+      const { authMod, auth } = await getFirebase();
+      await authMod.signOut(auth);
     } catch (e) {
       handleAuthError(e);
       throw e;
