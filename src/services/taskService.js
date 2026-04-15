@@ -50,11 +50,26 @@ function omitUndefined(updates) {
   );
 }
 
+function readDescriptionFromDoc(data) {
+  if (data == null || typeof data !== "object") return "";
+  const candidates = [
+    data.description,
+    data.details,
+    data.detail,
+    data.desc,
+  ];
+  for (const value of candidates) {
+    if (typeof value === "string") return value;
+  }
+  return "";
+}
+
 function mapDocToTask(docSnap) {
   const data = docSnap.data();
   return {
     id: docSnap.id,
     title: data.title ?? "",
+    description: readDescriptionFromDoc(data),
     completed: Boolean(data.completed),
     priority: data.priority ?? "medium",
     createdAt: data.createdAt ?? null,
@@ -83,9 +98,17 @@ export async function addTask(userId, task) {
       "Titre de tâche invalide : le titre est requis et ne peut pas être vide."
     );
   }
+  let description = "";
+  if (typeof task?.description === "string") {
+    description = task.description.trim();
+  } else if (task?.description != null && typeof task.description !== "object") {
+    description = String(task.description).trim();
+  }
+
   try {
     await addDoc(tasksCollection(userId), {
       title,
+      description,
       completed: false,
       priority: task.priority ?? "medium",
       createdAt: serverTimestamp(),
