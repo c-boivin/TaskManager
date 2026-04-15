@@ -10,6 +10,7 @@ import FilterBar, {
 } from "../components/FilterBar";
 import SearchBar from "../components/SearchBar";
 import TaskList from "../components/TaskList";
+import { ToastContainer, useToast } from "../components/Toast";
 import { AuthContext } from "@/contexts/AuthContext";
 import {
   addTask,
@@ -31,6 +32,7 @@ function createdAtMillis(createdAt) {
 export default function Home() {
   const { user, loading: authLoading } = useContext(AuthContext);
   const userId = user?.uid;
+  const { toasts, dismiss, success: showSuccess, error: showError } = useToast();
 
   const [tasks, setTasks] = useState([]);
   const [tasksLoaded, setTasksLoaded] = useState(false);
@@ -113,8 +115,10 @@ export default function Home() {
     try {
       setError(null);
       await deleteTask(userId, id);
+      showSuccess("Tâche supprimée avec succès.");
     } catch (e) {
       setError(e?.message ?? String(e));
+      showError("Impossible de supprimer la tâche.");
     }
   }
 
@@ -123,10 +127,12 @@ export default function Home() {
       throw new Error("Session expirée. Veuillez vous reconnecter.");
     }
     await addTask(userId, { title, priority, description });
+    showSuccess("Tâche ajoutée avec succès.");
   }
 
   return (
     <AuthGuard>
+      <ToastContainer toasts={toasts} onDismiss={dismiss} />
       <div
         id="tasks"
         className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 px-6 font-sans text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50"
