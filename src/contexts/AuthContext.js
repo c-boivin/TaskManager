@@ -21,6 +21,10 @@ const AUTH_ERROR_MESSAGES = {
   "auth/wrong-password": "Mot de passe incorrect.",
   "auth/too-many-requests": "Trop de tentatives. Réessayez plus tard.",
   "auth/invalid-credential": "Identifiants invalides. Vérifiez votre e-mail et mot de passe.",
+  "auth/popup-closed-by-user":
+    "La fenêtre de connexion a été fermée. Réessayez si vous souhaitez vous connecter.",
+  "auth/cancelled-popup-request":
+    "Une autre fenêtre de connexion est déjà ouverte. Fermez-la et réessayez.",
 };
 
 function mapAuthError(code) {
