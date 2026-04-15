@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useLayoutEffect } from "react";
+import { useContext, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { AuthContext } from "@/contexts/AuthContext";
 
@@ -8,7 +8,7 @@ export default function AuthGuard({ children }) {
   const { user, loading } = useContext(AuthContext);
   const router = useRouter();
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (loading || user) return;
     router.replace("/login");
   }, [loading, user, router]);
