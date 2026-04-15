@@ -2,9 +2,6 @@
 
 import { useId } from "react";
 
-/**
- * @param {{ percentage: number; label: string }} props
- */
 export default function ProgressBar({ percentage, label }) {
   const labelId = useId();
   const raw =
@@ -16,14 +13,14 @@ export default function ProgressBar({ percentage, label }) {
 
   return (
     <div className="w-full">
-      <div className="mb-1 flex items-center justify-between text-xs font-medium text-zinc-700 dark:text-zinc-300">
-        <span id={labelId}>{label}</span>
-        <span className="tabular-nums" aria-hidden>
-          {valueNow} %
+      <div className="mb-1.5 flex items-center justify-between">
+        <span id={labelId} className="text-xs text-[#8d90a0]">{label}</span>
+        <span className="text-xs tabular-nums text-[#b5c4ff]" aria-hidden>
+          {valueNow}%
         </span>
       </div>
       <div
-        className="h-2 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800"
+        className="h-2 overflow-hidden rounded-full bg-[#35343a]"
         role="progressbar"
         aria-labelledby={labelId}
         aria-valuenow={valueNow}
@@ -31,7 +28,7 @@ export default function ProgressBar({ percentage, label }) {
         aria-valuemax={100}
       >
         <div
-          className="h-full rounded-full bg-blue-600 transition-[width] duration-300 ease-out dark:bg-blue-500"
+          className="h-full rounded-full bg-[#648aff] transition-all duration-300 ease-out"
           style={{ width: `${clamped}%` }}
         />
       </div>

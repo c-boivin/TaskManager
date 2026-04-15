@@ -2,10 +2,6 @@
 
 import ProgressBar from "./ProgressBar";
 
-/**
- * Affiche des statistiques sur un tableau de tâches ({ id, title, …, completed }).
- * @param {{ tasks?: Array<{ completed?: boolean }>; showProgress?: boolean }} props
- */
 export default function TaskStats({ tasks, showProgress = true }) {
   const list = tasks ?? [];
   const total = list.length;
@@ -14,48 +10,34 @@ export default function TaskStats({ tasks, showProgress = true }) {
   const progressPercent =
     total === 0 ? 0 : Math.round((completedCount / total) * 100);
 
+  const stats = [
+    { label: "Total", value: total },
+    { label: "Complétées", value: completedCount },
+    { label: "Actives", value: activeCount },
+  ];
+
   return (
-    <section
-      className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-950"
-      aria-labelledby="task-stats-heading"
-    >
-      <h3
-        id="task-stats-heading"
-        className="mb-3 text-sm font-semibold text-zinc-900 dark:text-zinc-50"
-      >
+    <section aria-labelledby="task-stats-heading">
+      <h3 id="task-stats-heading" className="sr-only">
         Statistiques
       </h3>
-      <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <div className="rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-900">
-          <dt className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
-            Total
-          </dt>
-          <dd className="text-lg font-semibold tabular-nums text-zinc-900 dark:text-zinc-50">
-            {total}
-          </dd>
-        </div>
-        <div className="rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-900">
-          <dt className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
-            Complétées
-          </dt>
-          <dd className="text-lg font-semibold tabular-nums text-zinc-900 dark:text-zinc-50">
-            {completedCount}
-          </dd>
-        </div>
-        <div className="rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-900">
-          <dt className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
-            Actives
-          </dt>
-          <dd className="text-lg font-semibold tabular-nums text-zinc-900 dark:text-zinc-50">
-            {activeCount}
-          </dd>
-        </div>
+      <dl className="grid grid-cols-3 gap-2 sm:gap-4">
+        {stats.map((s) => (
+          <div key={s.label} className="rounded-lg border border-white/[0.08] bg-[#1f1f25] px-3 py-2 sm:px-4 sm:py-3">
+            <dt className="text-[10px] font-medium uppercase tracking-wider text-[#8d90a0]">
+              {s.label}
+            </dt>
+            <dd className="mt-1 text-xl font-black tabular-nums text-[#e4e1e9]">
+              {s.value}
+            </dd>
+          </div>
+        ))}
       </dl>
-      {showProgress ? (
-        <div className="mt-4">
+      {showProgress && (
+        <div className="mt-3">
           <ProgressBar percentage={progressPercent} label="Progression" />
         </div>
-      ) : null}
+      )}
     </section>
   );
 }
