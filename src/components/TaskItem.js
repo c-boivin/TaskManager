@@ -19,7 +19,7 @@ export default function TaskItem({
 
   return (
     <div
-      className={`flex items-center gap-4 rounded-xl border border-zinc-200 p-4 shadow-sm dark:border-zinc-700 ${
+      className={`flex items-start gap-4 rounded-xl border border-zinc-200 p-4 shadow-sm dark:border-zinc-700 ${
         completed ? "bg-zinc-100 dark:bg-zinc-900" : "bg-white dark:bg-zinc-950"
       }`}
     >
@@ -32,7 +32,7 @@ export default function TaskItem({
             ? `Marquer « ${title} » comme non complétée`
             : `Marquer « ${title} » comme complétée`
         }
-        className={`flex-shrink-0 ${completed ? "text-blue-700 dark:text-blue-400" : "text-zinc-600 hover:text-blue-600 dark:text-zinc-400 dark:hover:text-blue-400"}`}
+        className={`mt-0.5 flex-shrink-0 ${completed ? "text-blue-700 dark:text-blue-400" : "text-zinc-600 hover:text-blue-600 dark:text-zinc-400 dark:hover:text-blue-400"}`}
         onClick={() => onToggle(id)}
       >
         {completed ? (
@@ -82,17 +82,17 @@ export default function TaskItem({
             {priority}
           </span>
         </div>
-        {description ? (
+        {description && String(description).trim() !== "" ? (
           <p
-            className={`truncate text-sm ${completed ? "text-zinc-600 dark:text-zinc-400" : "text-zinc-800 dark:text-zinc-200"}`}
+            className={`break-words text-left text-sm whitespace-pre-wrap ${completed ? "text-zinc-600 dark:text-zinc-400" : "text-zinc-800 dark:text-zinc-200"}`}
           >
-            {description}
+            {String(description).trim()}
           </p>
         ) : null}
       </div>
       <button
         type="button"
-        className="flex-shrink-0 rounded-lg p-2 text-zinc-600 hover:bg-red-50 hover:text-red-700 dark:text-zinc-400 dark:hover:bg-red-950/40 dark:hover:text-red-400"
+        className="mt-0.5 flex-shrink-0 rounded-lg p-2 text-zinc-600 hover:bg-red-50 hover:text-red-700 dark:text-zinc-400 dark:hover:bg-red-950/40 dark:hover:text-red-400"
         aria-label={`Supprimer la tâche « ${title} »`}
         onClick={() => onDelete(id)}
       >

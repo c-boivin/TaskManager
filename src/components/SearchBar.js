@@ -39,7 +39,7 @@ export default function SearchBar({ value = "", onChange }) {
         type="search"
         value={value}
         onChange={(e) => onChange?.(e)}
-        placeholder="Rechercher une tâche..."
+        placeholder="Rechercher par titre ou description…"
         autoComplete="off"
         className="w-full rounded-lg border border-zinc-300 bg-white py-2 pl-10 pr-10 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-500/20 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-500"
       />

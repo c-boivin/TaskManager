@@ -20,7 +20,9 @@ export default function TaskList({ tasks, onToggle, onDelete }) {
           <TaskItem
             id={task.id}
             title={task.title}
-            description={task.description}
+            description={
+              typeof task.description === "string" ? task.description : ""
+            }
             priority={task.priority}
             completed={task.completed}
             onToggle={onToggle}
