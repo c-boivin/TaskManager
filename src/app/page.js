@@ -124,7 +124,7 @@ export default function LandingPage() {
             <span className="material-symbols-outlined text-primary-container" style={{ fontSize: 18 }}>task_alt</span>
             TaskManager
           </div>
-          <p className="text-xs text-muted/60">
+          <p className="text-xs text-muted">
             © {new Date().getFullYear()} TaskManager. Projet ECV.
           </p>
         </div>
