@@ -29,47 +29,38 @@ function createdAtMillis(createdAt) {
 }
 
 export default function Home() {
-  const { user } = useContext(AuthContext);
+  const { user, loading: authLoading } = useContext(AuthContext);
   const userId = user?.uid;
 
   const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [tasksLoaded, setTasksLoaded] = useState(false);
   const [error, setError] = useState(null);
+
+  const loading = authLoading || (!tasksLoaded && !!userId);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState(TASK_STATUS.ALL);
   const [sortOrder, setSortOrder] = useState("priority");
 
   useEffect(() => {
-    if (!userId) {
-      setTasks([]);
-      setLoading(false);
-      return;
-    }
+    if (!userId) return;
 
-    setLoading(true);
-    setError(null);
-
-    let unsubscribe;
-    try {
-      unsubscribe = subscribeToTasks(
-        userId,
-        (nextTasks) => {
-          setTasks(nextTasks);
-          setLoading(false);
-          setError(null);
-        },
-        (err) => {
-          setError(err?.message ?? String(err));
-          setLoading(false);
-        },
-      );
-    } catch (e) {
-      setError(e?.message ?? String(e));
-      setLoading(false);
-    }
+    const unsubscribe = subscribeToTasks(
+      userId,
+      (nextTasks) => {
+        setTasks(nextTasks);
+        setTasksLoaded(true);
+        setError(null);
+      },
+      (err) => {
+        setError(err?.message ?? String(err));
+        setTasksLoaded(true);
+      },
+    );
 
     return () => {
-      unsubscribe?.();
+      unsubscribe();
+      setTasks([]);
+      setTasksLoaded(false);
     };
   }, [userId]);
 
@@ -175,13 +166,18 @@ export default function Home() {
               </p>
             ) : null}
             {loading ? (
-              <p
-                className="py-8 text-center text-zinc-700 dark:text-zinc-300"
-                role="status"
-                aria-live="polite"
-              >
-                Chargement...
-              </p>
+              <div role="status" aria-live="polite" className="flex flex-col gap-4">
+                <div className="sr-only">Chargement des tâches...</div>
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="animate-pulse rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900"
+                  >
+                    <div className="mb-2 h-4 w-3/4 rounded bg-zinc-200 dark:bg-zinc-700" />
+                    <div className="h-3 w-1/2 rounded bg-zinc-100 dark:bg-zinc-800" />
+                  </div>
+                ))}
+              </div>
             ) : (
               <>
                 <Dashboard tasks={tasks} />
