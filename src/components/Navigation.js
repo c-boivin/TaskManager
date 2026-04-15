@@ -4,86 +4,125 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useContext } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
-import UserMenu from "@/components/UserMenu";
-
-const navLinks = [
-  { href: "/", label: "Mes tâches" },
-  { href: "/shared", label: "Listes partagées" },
-];
 
 export default function Navigation() {
   const pathname = usePathname();
-  const { user, loading } = useContext(AuthContext);
+  const { user, loading, signOut } = useContext(AuthContext);
+
+  const navLinks = [
+    { href: "/tasks", label: "Mes tâches", icon: "check_circle" },
+    { href: "/shared", label: "Partagées", icon: "group" },
+  ];
 
   return (
-    <nav
-      aria-label="Navigation principale"
-      className="sticky top-0 z-50 border-b border-zinc-200 bg-white/80 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/80"
-    >
-      <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-4 px-6">
-        <Link
-          href="/"
-          className="text-lg font-semibold tracking-tight text-zinc-900 transition-colors hover:text-zinc-700 dark:text-zinc-50 dark:hover:text-zinc-200"
-        >
-          TaskManager
-        </Link>
+    <>
+      {/* Top bar */}
+      <nav className="sticky top-0 z-50 h-14 border-b border-white/[0.08] bg-[rgba(10,10,15,0.8)] backdrop-blur-xl sm:h-16">
+        <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-4 sm:px-6">
+          <Link
+            href="/"
+            className="flex items-center gap-2 text-base font-bold tracking-tight text-[#e4e1e9] transition-colors hover:text-[#b5c4ff] sm:text-lg"
+          >
+            <span
+              className="material-symbols-outlined text-[#648aff]"
+              style={{ fontSize: 22 }}
+            >
+              task_alt
+            </span>
+            <span className="hidden xs:inline">TaskManager</span>
+            <span className="xs:hidden">TaskManager</span>
+          </Link>
 
-        <div className="flex min-w-0 flex-1 items-center justify-end gap-6">
-          <ul className="flex items-center gap-1 sm:gap-2">
-            {navLinks.map(({ href, label }) => {
-              const isActive =
-                href === "/"
-                  ? pathname === "/"
-                  : pathname.startsWith(href);
+          {user && (
+            <ul className="hidden items-center gap-1 sm:flex">
+              {navLinks.map(({ href, label, icon }) => {
+                const isActive = pathname === href || pathname.startsWith(href + "/");
+                return (
+                  <li key={href}>
+                    <Link
+                      href={href}
+                      className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 ${
+                        isActive
+                          ? "bg-[#648aff]/15 text-[#b5c4ff]"
+                          : "text-[#8d90a0] hover:bg-white/5 hover:text-[#e4e1e9]"
+                      }`}
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+                        {icon}
+                      </span>
+                      {label}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
 
-              return (
-                <li key={href}>
-                  <Link
-                    href={href}
-                    aria-current={isActive ? "page" : undefined}
-                    className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                      isActive
-                        ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
-                        : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
-                    }`}
-                  >
-                    {label}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-
-          <div className="min-w-0 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3">
             {loading ? (
-              <span className="text-sm text-zinc-500 dark:text-zinc-400">
-                …
-              </span>
+              <div className="h-4 w-16 animate-pulse rounded bg-white/5 sm:w-24" />
             ) : user ? (
-              <UserMenu />
+              <>
+                <span className="hidden max-w-[10rem] truncate text-sm text-[#8d90a0] md:block" title={user.email}>
+                  {user.email}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => signOut()}
+                  className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] px-2.5 py-1.5 text-sm font-medium text-[#8d90a0] transition-all duration-150 hover:bg-white/5 hover:text-[#e4e1e9] active:scale-95 sm:px-3"
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+                    logout
+                  </span>
+                  <span className="hidden sm:inline">Déconnexion</span>
+                </button>
+              </>
             ) : (
-              <ul className="flex items-center gap-2 sm:gap-3">
-                <li>
-                  <Link
-                    href="/login"
-                    className="text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
-                  >
-                    Connexion
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/signup"
-                    className="rounded-lg bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
-                  >
-                    Inscription
-                  </Link>
-                </li>
-              </ul>
+              <>
+                <Link
+                  href="/login"
+                  className="text-sm font-medium text-[#8d90a0] transition-colors hover:text-[#e4e1e9]"
+                >
+                  Connexion
+                </Link>
+                <Link
+                  href="/signup"
+                  className="rounded-lg bg-gradient-to-br from-[#b5c4ff] to-[#648aff] px-3 py-1.5 text-sm font-semibold text-[#131318] transition-all duration-150 hover:shadow-lg hover:shadow-[#648aff]/20 active:scale-95 sm:px-4"
+                >
+                  S&apos;inscrire
+                </Link>
+              </>
             )}
           </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+
+      {/* Mobile bottom nav */}
+      {user && (
+        <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/[0.08] bg-[rgba(10,10,15,0.95)] backdrop-blur-xl sm:hidden" aria-label="Navigation mobile">
+          <div className="flex h-14 items-stretch">
+            {navLinks.map(({ href, label, icon }) => {
+              const isActive = pathname === href || pathname.startsWith(href + "/");
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`flex flex-1 flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition-colors ${
+                    isActive
+                      ? "text-[#b5c4ff]"
+                      : "text-[#8d90a0]"
+                  }`}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: 22, fontVariationSettings: isActive ? "'FILL' 1" : undefined }}>
+                    {icon}
+                  </span>
+                  {label}
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
+      )}
+    </>
   );
 }

@@ -26,21 +26,18 @@ export default function UserMenu() {
   }
 
   return (
-    <div className="flex max-w-[min(100%,14rem)] items-center gap-2 sm:max-w-xs sm:gap-3 md:max-w-md">
-      <p
-        className="min-w-0 truncate text-sm text-zinc-600 dark:text-zinc-400"
-        title={email || undefined}
-      >
-        <span className="sr-only">Compte connecté : </span>
+    <div className="flex items-center gap-3">
+      <span className="hidden max-w-[10rem] truncate text-sm text-muted sm:block" title={email || undefined}>
         {email || "—"}
-      </p>
+      </span>
       <button
         type="button"
         onClick={handleSignOut}
         disabled={signingOut}
-        className="shrink-0 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-800 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100 dark:hover:bg-zinc-800"
+        className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-muted transition-all duration-150 hover:border-border-strong hover:bg-white/5 hover:text-foreground active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {signingOut ? "Déconnexion..." : "Se déconnecter"}
+        <span className="material-symbols-outlined" style={{ fontSize: 16 }}>logout</span>
+        <span className="hidden sm:inline">{signingOut ? "Déconnexion..." : "Déconnexion"}</span>
       </button>
     </div>
   );

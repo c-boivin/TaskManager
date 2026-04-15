@@ -19,15 +19,15 @@ export default function AuthGuard({ children }) {
       : "Redirection vers la connexion...";
     return (
       <div
-        className="flex flex-1 flex-col items-center justify-center gap-4 bg-zinc-50 px-6 py-12 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50"
+        className="flex flex-1 flex-col items-center justify-center gap-4 px-6 py-12"
         role="status"
         aria-live="polite"
       >
         <div
-          className="size-8 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-700 dark:border-zinc-600 dark:border-t-zinc-200"
+          className="size-8 animate-spin rounded-full border-2 border-white/10 border-t-primary"
           aria-hidden
         />
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">{message}</p>
+        <p className="text-sm text-muted">{message}</p>
       </div>
     );
   }
