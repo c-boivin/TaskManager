@@ -1,5 +1,5 @@
 import { Geist, Geist_Mono } from "next/font/google";
-import Header from "@/components/Header";
+import Navigation from "@/components/Navigation";
 import { Providers } from "./providers";
 import "./globals.css";
 
@@ -38,7 +38,7 @@ export default function RootLayout({ children }) {
     >
       <body className="flex min-h-full flex-col font-sans">
         <Providers>
-          <Header />
+          <Navigation />
           {children}
         </Providers>
       </body>
