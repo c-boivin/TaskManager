@@ -34,7 +34,7 @@ export default function RootLayout({ children }) {
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0..1,0&icon_names=add,add_circle,bolt,check,check_circle,checklist,chevron_right,close,delete,edit,error,folder_shared,group,home,lock,logout,mail,monitoring,open_in_new,person_add,playlist_add,refresh,rocket_launch,search,shield,task_alt&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0..1,0&icon_names=add,add_circle,arrow_back,bolt,check,check_circle,checklist,chevron_right,close,delete,edit,error,folder_shared,group,home,lock,logout,mail,monitoring,open_in_new,person_add,playlist_add,refresh,rocket_launch,search,shield,task,task_alt&display=swap"
         />
       </head>
       <body className="flex min-h-full flex-col font-sans">
