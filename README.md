@@ -1,5 +1,7 @@
 # TaskManager
 
+**Dépôt GitHub :** <https://github.com/c-boivin/TaskManager>
+
 Application web de gestion de tâches collaborative (exercice / démo), construite avec **Next.js**, **React** et **Firebase**. Interface en français, thème sombre, design responsive (Tailwind CSS).
 
 ## Fonctionnalités
